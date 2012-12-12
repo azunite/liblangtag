@@ -1124,7 +1124,7 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 				   lt_error_t **error)
 {
 	char *s, *territory, *codeset, *modifier, *script = NULL, *p;
-	lt_tag_t *tag;
+	lt_tag_t *tag, *transform;
 	lt_error_t *err = NULL;
 
 	s = strdup(locale);
@@ -1137,7 +1137,6 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 	} else {
 		lt_string_t *tag_string;
 		const char *sscript = NULL, *variant = NULL, *privateuse = NULL;
-		char *transform;
 
 		modifier = strchr(s, '@');
 		if (modifier) {
@@ -1208,19 +1207,19 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 			lt_string_unref(tag_string);
 			goto bail;
 		}
-		lt_string_clear(tag_string);
-		lt_string_append(tag_string, transform);
-		free(transform);
+		lt_tag_unref(tag);
+		tag = transform;
 		if (codeset || privateuse) {
-			lt_string_append(tag_string, "-x");
+			lt_string_clear(tag_string);
+			lt_string_append_c(tag_string, 'x');
 			if (codeset)
 				lt_string_append_printf(tag_string, "-codeset-%s", codeset);
 			if (privateuse)
 				lt_string_append_printf(tag_string, "-%s", privateuse);
-		}
-		if (!lt_tag_parse(tag, lt_string_value(tag_string), &err)) {
-			lt_string_unref(tag_string);
-			goto bail;
+			if (!lt_tag_parse_with_extra_token(tag, lt_string_value(tag_string), &err)) {
+				lt_string_unref(tag_string);
+				goto bail;
+			}
 		}
 		lt_string_unref(tag_string);
 	}
@@ -1684,6 +1683,9 @@ lt_tag_parse_with_extra_token(lt_tag_t    *tag,
 	lt_return_val_if_fail (tag != NULL, FALSE);
 	lt_return_val_if_fail (tag->state != STATE_NONE, FALSE);
 
+	/* Update the tag string */
+	lt_tag_get_string(tag);
+
 	return _lt_tag_parse(tag, tag_string, FALSE, error);
 }
 
@@ -1838,7 +1840,8 @@ lt_tag_truncate(lt_tag_t    *tag,
  *
  * Obtains a language tag in string against @filter.
  *
- * Returns: a language tag string.
+ * Returns: a language tag string. the returned value is owned by the library.
+ *          it must not be freed.
  */
 const char *
 lt_tag_get_string_with_filter(lt_tag_t *tag,
@@ -2274,15 +2277,15 @@ lt_tag_lookup(const lt_tag_t  *tag,
  *
  * Transform @tag according to the likelySubtags database provided by CLDR.
  *
- * Returns: a string.
+ * Returns: (transfer full): a #lt_tag_t which contains tramsformed language tag.
  */
-char *
+lt_tag_t *
 lt_tag_transform(lt_tag_t    *tag,
 		 lt_error_t **error)
 {
-	char *retval = NULL, *s;
+	char *transform = NULL, *s;
 	lt_error_t *err = NULL;
-	lt_tag_t *canoned_tag = NULL;
+	lt_tag_t *canoned_tag = NULL, *retval = NULL;
 	lt_list_t *lv = NULL;
 	const lt_list_t *l;
 	lt_extension_t *ext = NULL;
@@ -2407,7 +2410,7 @@ lt_tag_transform(lt_tag_t    *tag,
 				if (lt_string_at(s, i) == '_')
 					lt_string_replace_c(s, i, '-');
 			}
-			retval = lt_string_free(s, FALSE);
+			transform = lt_string_free(s, FALSE);
 		  bail3:
 			if (retry > 1)
 				lt_error_clear(err);
@@ -2416,14 +2419,14 @@ lt_tag_transform(lt_tag_t    *tag,
 			if (xobj)
 				xmlXPathFreeObject(xobj);
 
-			if (retval) {
+			if (transform) {
 				const lt_list_t *l, *ll;
 				lt_region_t *r;
 				lt_script_t *sc;
 
-				wt = lt_tag_new();
-				if (lt_tag_parse(wt, retval, &err)) {
-					free(retval);
+				retval = lt_tag_new();
+				if (lt_tag_parse(retval, transform, &err)) {
+					free(transform);
 
 					switch (retry) {
 					    case 1:
@@ -2448,7 +2451,7 @@ lt_tag_transform(lt_tag_t    *tag,
 						    for (ll = l; ll != NULL; ll = lt_list_next(ll)) {
 							    lt_variant_t *v = lt_list_value(ll);
 
-							    lt_tag_set_variant(wt, lt_variant_ref(v));
+							    lt_tag_set_variant(retval, lt_variant_ref(v));
 						    }
 						    break;
 					}
@@ -2459,13 +2462,10 @@ lt_tag_transform(lt_tag_t    *tag,
 						lt_tag_set_extension(wt, lt_extension_ref(ext));
 					if (priv)
 						lt_string_append(wt->privateuse, lt_string_value(priv));
-					lt_tag_free_tag_string(wt);
-					retval = strdup(lt_tag_get_string(wt));
+					lt_tag_free_tag_string(retval);
 				} else {
-					free(retval);
-					retval = NULL;
+					free(transform);
 				}
-				lt_tag_unref(wt);
 				break;
 			}
 		}
