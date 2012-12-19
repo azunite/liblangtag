@@ -75,7 +75,7 @@
 /* inlining hassle. for compilers thta don't allow the 'inline' keyword,
  * mostly because of strict ANSI C compliance or dumbness, we try to fall
  * back to either '__inline__' or '__inline'.
- * LT_CAN_INLINE is defined in hgconfig.h if the compiler seems to be
+ * LT_CAN_INLINE is defined in config.h if the compiler seems to be
  * actually *capable* to do function inlining, in which case inline
  * function bodies do make sense. we also define LT_INLINE_FUNC to properly
  * export the function prototypes if no inlining can be performed.
@@ -107,12 +107,35 @@
 #  define LT_INLINE_FUNC
 #endif
 
+/**
+ * LT_GNUC_PRINTF:
+ * @format_idx: the index of the argument corresponding to the format string.
+ *              (The arguments are numberered from 1).
+ * @arg_idx: the index of the first of the format arguments.
+ *
+ * Expands to the GNU C <literal>format</literal> function attribute if
+ * the compiler is <command>gcc</command>. This is used for declaring
+ * functions which take a variable number of arguments, with the same
+ * syntax as <function>printf()</function>.
+ * It allows the compiler to type-check the arguments passed to the function.
+ * See the GNU C documentation for details.
+ */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #  define LT_GNUC_PRINTF(format_idx, arg_idx)	\
 	__attribute__((__format__ (__printf__, format_idx, arg_idx)))
 #else /* !__GNUC__ */
 #  define LT_GNUC_PRINTF(format_idx, arg_idx)
 #endif
+/**
+ * LT_GNUC_NULL_TERMINATED:
+ *
+ * Expands to the GNU C <literal>sentinel</literal> function attribute
+ * if the compiler is <command>gcc</command>, or "" if it isn't.
+ * This function attribute only applies to variadic functions and instructs
+ * the compiler to check that the argument list is terminated with an
+ * explicit %NULL.
+ * See the GNU C documentation for details.
+ */
 #if __GNUC__ >= 4
 #  define LT_GNUC_NULL_TERMINATED		\
 	__attribute__((__sentinel__))
@@ -127,6 +150,24 @@
  *
  * The _LT_BOOLEAN_EXPR macro is intended to trigger a gcc warning when
  * putting assignments in lt_return_if_fail()
+ */
+/**
+ * LT_LIKELY:
+ * @_e_: the expression
+ *
+ * Hints the compiler that the expression is likely to evaluate to a true value.
+ * The compiler may use this information for optimizations.
+ *
+ * Returns: the value of @expr.
+ */
+/**
+ * LT_UNLIKELY:
+ * @_e_: the expression
+ *
+ * Hints the compiler that the expression is unlikely to evaluate to a true
+ * value. The compiler may use this information for optimizations.
+ *
+ * Returns: the value of @expr.
  */
 #if defined(__GNUC__) && (__GNUC__ > 2) && defined(__OPTIMIZE__)
 #  define _LT_BOOLEAN_EXPR(_e_)				\
@@ -186,6 +227,17 @@
 #define LT_ALIGNED_TO_POINTER(_x_)	LT_ALIGNED_TO ((_x_), ALIGNOF_VOID_P)
 
 /* Macro to count the number of elements in an array. */
+/**
+ * LT_N_ELEMENTS:
+ * @_x_: the array
+ *
+ * Determines the number of elements in an array. The array must be
+ * declared so the compiler knows its size at compile-time; this
+ * macro will not work on an array allocated on the heap, only static
+ * arrays or arrays on the stack.
+ *
+ * Returns: the number of elements.
+ */
 #define LT_N_ELEMENTS(_x_)		(sizeof (_x_) / sizeof ((_x_)[0]))
 
 /* Debugging macro */

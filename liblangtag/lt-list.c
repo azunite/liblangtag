@@ -75,6 +75,16 @@ _lt_list_sort_merge(lt_list_t         *l1,
 }
 
 /*< protected >*/
+/**
+ * lt_list_new:
+ *
+ * Creates #lt_list_t object. this function is protected and not supposed
+ * to use in applications directly. Use lt_list_append() or lt_list_prepend()
+ * with %NULL as the first argument to newly allocate the object.
+ *
+ * Returns: (transfer full): a newly allocated #lt_list_t. it has to be freed
+ *          with lt_list_unref().
+ */
 lt_list_t *
 lt_list_new(void)
 {

@@ -44,6 +44,16 @@ typedef struct _lt_error_data_t {
  * This section describes the error handling in this library.
  */
 /*< private >*/
+
+/**
+ * lt_error_new:
+ *
+ * Creates #lt_error_t object. this function is protected and not supposed
+ * to use in applications directly. Use lt_error_set().
+ *
+ * Returns: (transfer full): a newly allocated #lt_error_t. it has to be freed
+ *          with lt_error_unref().
+ */
 lt_error_t *
 lt_error_new(void)
 {
