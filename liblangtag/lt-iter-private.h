@@ -31,6 +31,10 @@ struct _lt_iter_tmpl_t {
 	lt_iter_fini_func_t fini;
 	lt_iter_next_func_t next;
 };
+struct _lt_iter_t {
+	lt_iter_tmpl_t *target;
+};
+
 
 #define LT_ITER_TMPL_INIT(_instance_, _prefix_)			\
 	LT_STMT_START {						\

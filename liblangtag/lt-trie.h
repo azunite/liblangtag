@@ -21,11 +21,6 @@
 LT_BEGIN_DECLS
 
 typedef struct _lt_trie_t	lt_trie_t;
-typedef struct _lt_trie_iter_t {
-	lt_iter_t    parent;
-	lt_list_t   *stack;
-	lt_string_t *pos_str;
-} lt_trie_iter_t;
 
 lt_trie_t      *lt_trie_new        (void);
 lt_trie_t      *lt_trie_ref        (lt_trie_t         *trie);
