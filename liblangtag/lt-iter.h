@@ -21,6 +21,14 @@
 
 LT_BEGIN_DECLS
 
+/**
+ * LT_ITER_INIT:
+ * @_obj_: an object that initialize the iterator with.
+ *
+ * This is a convenient macro to call lt_iter_init().
+ *
+ * Returns: (transfer full): a #lt_iter_t.
+ */
 #define LT_ITER_INIT(_obj_)	lt_iter_init((lt_iter_tmpl_t *)(_obj_))
 
 /**
