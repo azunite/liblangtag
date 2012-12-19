@@ -67,8 +67,10 @@ IGNORE_HFILES=				\
 	lt-extension-private.h		\
 	lt-extlang-private.h		\
 	lt-grandfathered-private.h	\
+	lt-iter-private.h		\
 	lt-lang-private.h		\
 	lt-localealias.h		\
+	lt-lock.h			\
 	lt-mem.h			\
 	lt-messages.h			\
 	lt-redundant-private.h		\
