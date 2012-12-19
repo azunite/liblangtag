@@ -338,8 +338,6 @@ lt_ext_module_singleton_char_to_int(char singleton_c)
 {
 	int retval = -1;
 
-	if (!lt_ext_module_validate_singleton(singleton_c))
-		fprintf(stderr, "XXXXXXXXx: %c\n", singleton_c);
 	lt_return_val_if_fail (lt_ext_module_validate_singleton(singleton_c), -1);
 
 	if (singleton_c >= '0' && singleton_c <= '9') {
