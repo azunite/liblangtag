@@ -200,7 +200,7 @@ _lt_extlang_db_iter_init(lt_iter_tmpl_t *tmpl)
 
 	retval = malloc(sizeof (lt_extlang_db_iter_t));
 	if (retval) {
-		retval->iter = lt_iter_init((lt_iter_tmpl_t *)extlangdb->extlang_entries);
+		retval->iter = LT_ITER_INIT (extlangdb->extlang_entries);
 		if (!retval->iter) {
 			free(retval);
 			retval = NULL;

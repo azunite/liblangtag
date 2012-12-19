@@ -21,7 +21,21 @@
 
 LT_BEGIN_DECLS
 
+#define LT_ITER_INIT(_obj_)	lt_iter_init((lt_iter_tmpl_t *)(_obj_))
+
+/**
+ * lt_iter_tmpl_t:
+ *
+ * All the fields in the <structname>lt_iter_tmpl_t</structname>
+ * structure are private to the #lt_iter_tmpl_t implementation.
+ */
 typedef struct _lt_iter_tmpl_t	lt_iter_tmpl_t;
+/**
+ * lt_iter_t:
+ *
+ * All the fields in the <structname>lt_iter_t</structname>
+ * structure are private to the #lt_iter_t implementation.
+ */
 typedef struct _lt_iter_t	lt_iter_t;
 
 struct _lt_iter_t {

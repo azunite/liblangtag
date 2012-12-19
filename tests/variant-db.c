@@ -35,7 +35,7 @@ main(int    argc,
 		const char *key;
 		lt_iter_t *iter;
 
-		iter = lt_iter_init((lt_iter_tmpl_t *)variantdb);
+		iter = LT_ITER_INIT (variantdb);
 		while (lt_iter_next(iter,
 				    (lt_pointer_t *)&key,
 				    NULL)) {
@@ -45,7 +45,7 @@ main(int    argc,
 	} else if (lt_strcmp0(argv[1], "list_values") == 0) {
 		lt_iter_t *iter;
 
-		iter = lt_iter_init((lt_iter_tmpl_t *)variantdb);
+		iter = LT_ITER_INIT (variantdb);
 		while (lt_iter_next(iter,
 				    NULL,
 				    (lt_pointer_t *)&variant)) {

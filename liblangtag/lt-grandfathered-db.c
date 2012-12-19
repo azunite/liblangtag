@@ -179,7 +179,7 @@ _lt_grandfathered_db_iter_init(lt_iter_tmpl_t *tmpl)
 
 	retval = malloc(sizeof (lt_grandfathered_db_iter_t));
 	if (retval) {
-		retval->iter = lt_iter_init((lt_iter_tmpl_t *)db->grandfathered_entries);
+		retval->iter = LT_ITER_INIT (db->grandfathered_entries);
 		if (!retval->iter) {
 			free(retval);
 			retval = NULL;
