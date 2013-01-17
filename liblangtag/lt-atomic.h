@@ -23,6 +23,8 @@
 LT_BEGIN_DECLS
 
 LT_INLINE_FUNC int       lt_atomic_int_get         (volatile int *v);
+LT_INLINE_FUNC void      lt_atomic_int_set         (volatile int *atomic,
+						    int           value);
 LT_INLINE_FUNC int       lt_atomic_int_inc         (volatile int *v);
 LT_INLINE_FUNC lt_bool_t lt_atomic_int_dec_and_test(volatile int *v);
 
@@ -40,6 +42,15 @@ lt_atomic_int_get(volatile int *v)
 	lt_return_val_if_fail (v != NULL, 0);
 
 	return (int)InterlockedExchange((LONG*)v, (LONG)*v);
+}
+
+LT_INLINE_FUNC void
+lt_atomic_int_set(volatile int *atomic,
+		  int           value)
+{
+	lt_return_if_fail (atomic != NULL);
+
+	InterlockedExchange((LONG*)atomic, (LONG)value);
 }
 
 LT_INLINE_FUNC int
@@ -66,6 +77,16 @@ lt_atomic_int_get(volatile int *v)
 
 	__sync_synchronize();
 	return *v;
+}
+
+LT_INLINE_FUNC void
+lt_atomic_int_set(volatile int *atomic,
+		  int           value)
+{
+	lt_return_if_fail (atomic != NULL);
+
+	*atomic = value;
+	__sync_synchronize();
 }
 
 LT_INLINE_FUNC int
@@ -97,6 +118,17 @@ lt_atomic_int_get(volatile int *v)
 	LT_UNLOCK (atomic);
 
 	return retval;
+}
+
+LT_INLINE_FUNC void
+lt_atomic_int_set(volatile int *atomic,
+		  int           value)
+{
+	lt_return_if_fail (atomic != NULL);
+
+	LT_LOCK (atomic);
+	*atomic = value;
+	LT_UNLOCK (atomic);
 }
 
 LT_INLINE_FUNC int

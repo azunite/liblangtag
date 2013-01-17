@@ -2,9 +2,16 @@
 =================
 * Enhancements:
   * Iterator support
+  * Add --disable-rebuild-data for cross-compiling
+  * Add lt_tag_convert_from_locale_string() function.
 * Bug Fixes:
   * Fix wrong traversal on keys
   * Fix xml parser for tags in range
+  * Build issues on MinGW/MSVC
+  * Fix portability issues
+  * Fix build issue when srcdir != builddir
+  * Fix lt_tag_transform() to get better result.
+  * Fix lt_tag_convert_from_locale() to get better result.
 
 0.3 -> 0.4
 =============

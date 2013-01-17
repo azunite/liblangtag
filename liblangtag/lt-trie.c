@@ -237,6 +237,26 @@ _lt_trie_iter_next(lt_iter_t    *iter,
 	return FALSE;
 }
 
+static lt_serializer_data_type_t
+_lt_serializer_trie_get_type(lt_serializer_t *serializer)
+{
+	return LT_SERIALIZE_TYPE_TRIE;
+}
+
+static lt_serialized_data_t *
+_lt_serializer_trie_serialize(lt_serializer_t      *serializer,
+			      const lt_pointer_t    data,
+			      lt_serialized_data_t *retval)
+{
+	lt_trie_t *trie = (lt_trie_t *)data;
+	lt_list_t *ary = NULL;
+	int count = 0;
+	lt_iter_t *iter = LT_ITER_INIT (trie);
+	lt_pointer_t v;
+
+	while (lt_iter_next (iter, NULL, 
+}
+
 /*< protected >*/
 
 /*< public >*/
@@ -359,4 +379,16 @@ lt_trie_keys(lt_trie_t *trie)
 	lt_iter_finish((lt_iter_t *)&iter);
 
 	return retval;
+}
+
+const lt_serializer_funcs_t *
+lt_serializer_get_trie_serializer_funcs(void)
+{
+	static const lt_serializer_funcs_t retval = {
+		_lt_serializer_trie_get_type,
+		_lt_serializer_trie_serialize,
+		_lt_serializer_trie_deserialize
+	};
+
+	return &retval;
 }

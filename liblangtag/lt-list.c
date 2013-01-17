@@ -34,6 +34,11 @@ struct _lt_list_t {
 	lt_list_t    *next;
 	lt_pointer_t  value;
 };
+typedef struct _lt_list_serialized_t {
+	lt_mem_serialized_t  parent;
+	uint32_t             element_size;
+	lt_pointer_t         data[FLEXIBLE_ARRAY_MEMBER];
+} lt_list_serialized_t;
 
 /*< private >*/
 static void
@@ -72,6 +77,59 @@ _lt_list_sort_merge(lt_list_t         *l1,
 	l->next->prev = l;
 
 	return list.next;
+}
+
+static lt_mem_serializer_type_t
+_lt_list_serializer_get_type(void)
+{
+	return LT_MEM_SERIALIZER_TYPE_ARRAY;
+}
+
+static lt_mem_serialized_t *
+_lt_list_serialize(const lt_pointer_t   data,
+		   lt_mem_serialized_t *object)
+{
+	lt_pointer_t q;
+	lt_list_t *l, *list = (lt_list_t *)data;
+	lt_list_serialized_t *retval;
+	uint32_t max_size = 0;
+	int n;
+
+	for (l = list, n = 0; l != NULL; l = lt_list_next(l), n++) {
+		lt_pointer_t p = lt_list_value(l);
+
+		if (lt_mem_is_object(p)) {
+			size_t i = lt_mem_get_object_size((lt_mem_t *)p);
+
+			max_size = LT_MAX (max_size, i);
+		} else if (lt_mem_is_serialized_object(p)) {
+			uint32_t i = lt_mem_get_serialized_size((lt_mem_serialized_t *)p);
+
+			max_size = LT_MAX (max_size, i);
+		} else {
+			lt_warning("Unable to serialize the list");
+			return NULL;
+		}
+	}
+	max_size = LT_ALIGNED_TO_POINTER (max_size);
+	object->size = max_size * n;
+	retval = realloc(object, sizeof (lt_list_serialized_t) + retval->size);
+	if (!retval)
+		return NULL;
+	retval->element_size = max_size;
+	for (l = list; l != NULL; l = lt_list_next(l)) {
+		lt_pointer_t p = lt_list_value(l);
+
+		if (lt_mem_is_object(p)) {
+			
+	}
+
+	return retval;
+}
+
+static lt_pointer_t
+_lt_list_deserialize(const lt_mem_serialized_t *data)
+{
 }
 
 /*< protected >*/
@@ -521,4 +579,16 @@ lt_list_pop(lt_list_t    *list,
 	list = lt_list_delete_link(list, list);
 
 	return list;
+}
+
+const lt_serializer_funcs_t *
+lt_serializer_get_list_serializer_funcs(void)
+{
+	static const lt_serializer_funcs_t retval = {
+		_lt_serializer_list_get_type,
+		_lt_serializer_list_serialize,
+		_lt_serializer_list_deserialize
+	};
+
+	return &retval;
 }

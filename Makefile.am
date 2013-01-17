@@ -2,11 +2,13 @@ NULL =
 AUTOMAKE_OPTIONS = dist-bzip2
 SUBDIRS = liblangtag extensions data docs
 
+if ENABLE_LIBXML
+SUBDIRS += liblangtag-xml
+endif
 if ENABLE_GOBJECT
 SUBDIRS += liblangtag-gobject
 endif
-#SUBDIRS += docs tests
-SUBDIRS += tests
+SUBDIRS += tests util
 
 ACLOCAL_AMFLAGS = -I m4macros
 
@@ -56,6 +58,9 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA =			\
 	liblangtag.pc			\
 	$(NULL)
+if ENABLE_LIBXML
+pkgconfig_DATA += liblangtag-xml.pc
+endif
 if ENABLE_GOBJECT
 pkgconfig_DATA += liblangtag-gobject.pc
 endif
@@ -63,6 +68,7 @@ $(pkgconfig_DATA): $(top_builddir)/config.status
 noinst_DATA =					\
 	liblangtag-uninstalled.pc		\
 	liblangtag-gobject-uninstalled.pc	\
+	liblangtag-xml-uninstalled.pc		\
 	$(NULL)
 $(noinst_DATA): $(top_builddir)/config.status
 #

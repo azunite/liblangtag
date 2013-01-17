@@ -12,6 +12,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 m4_pattern_allow(^LT_.*_DECLS$)
 m4_pattern_allow(^LT_POINTER_.*$)
+m4_pattern_allow(^LT_U?INT.*$)
 
 AM_MAINTAINER_MODE
 AM_CONFIG_HEADER([config.h])
@@ -187,6 +188,9 @@ if test "x$lt_cv_has_atomic" = "xyes"; then
 	AC_DEFINE(LT_HAVE_ATOMIC_BUILTINS, 1, [Have buit-in atomic functions])
 fi
 
+dnl ---compiler capabilities---
+AC_C_FLEXIBLE_ARRAY_MEMBER
+
 dnl ---size---
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(void *)
@@ -194,9 +198,32 @@ AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+dnl the following checks are just for convenient in macros
+AC_CHECK_SIZEOF(int8_t)
+AC_CHECK_SIZEOF(int16_t)
+AC_CHECK_SIZEOF(int32_t)
+AC_CHECK_SIZEOF(int64_t)
 
 dnl ---alignment---
 AC_CHECK_ALIGNOF(void *)
+
+dnl ---endian---
+AC_C_BIGENDIAN
+if test x$ac_cv_c_bigendian = xuniversal; then
+	AC_TRY_COMPILE([#include <endian.h>], [
+#if __BYTE_ORDER == __BIG_ENDIAN
+#else
+#error Not a big endian.
+#endif],
+		[ac_cv_c_bigendian=yes],
+		[AC_TRY_COMPILE([#include <endian.h>], [
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#else
+#error Not a little endian.
+#endif],
+		[ac_cv_c_bigendian=no],
+		[AC_MSG_WARN([Cound not determine endianness.])])])
+fi
 
 dnl ======================================================================
 dnl functions testing
@@ -337,7 +364,7 @@ AM_CONDITIONAL(REBUILD_DATA, test x$enable_rebuild_data = xyes)
 dnl ======================================================================
 dnl check pkg-config stuff
 dnl ======================================================================
-PKG_CHECK_MODULES(LIBXML2, libxml-2.0 >= $LIBXML2_REQUIRED)
+PKG_CHECK_MODULES(LIBXML2, libxml-2.0 >= $LIBXML2_REQUIRED, has_libxml=yes, has_libxml=no)
 PKG_CHECK_MODULES(GOBJECT, gobject-2.0 >= $GOBJECT_REQUIRED, has_gobject=yes, has_gobject=no)
 
 if test x$enable_test != xno; then
@@ -348,6 +375,7 @@ else
 	use_check=no
 fi
 
+AM_CONDITIONAL(ENABLE_LIBXML, test x$has_libxml != xno)
 AM_CONDITIONAL(ENABLE_UNIT_TEST, test x$use_check != xno)
 
 dnl ======================================================================
@@ -391,10 +419,27 @@ ____EOS
 	cat >> $outfile<<____EOS
 
 #define LT_POINTER_TO_INT(p)	((int) ${ptoi_cast} (p))
+#define LT_INT_TO_POINTER(p)	((lt_pointer_t) ${ptoi_cast} (p))
 ____EOS
 	else
 		echo "#error SIZEOF_VOID_P unknown"
 	fi
+
+	cat >> $outfile<<____EOS
+
+#define LT_INT64_CONSTANT(_v_)		$lt_int64_constant
+#define LT_UINT64_CONSTANT(_v_)		$lt_uint64_constant
+____EOS
+
+	lt_bit_sizes="16 32 64"
+	for bits in $lt_bit_sizes; do
+	cat >> $outfile<<____EOS
+#define LT_INT${bits}_TO_${lt_bs_native}(val)	((int${bits}_t) (val))
+#define LT_UINT${bits}_TO_${lt_bs_native}(val)	((uint${bits}_t) (val))
+#define LT_INT${bits}_TO_${lt_bs_alien}(val)	((int${bits}_t) LT_UINT${bits}_SWAP_LE_BE (val))
+#define LT_UINT${bits}_TO_${lt_bs_alien}(val)	(LT_UINT${bits}_SWAP_LE_BE (val))
+____EOS
+	done
 
 	cat >> $outfile<<____EOS
 
@@ -424,6 +469,27 @@ ____EOS
 		unknown_sizeof_void_p=yes
 		;;
 	esac
+	case 8 in
+	$ac_cv_sizeof_int)
+		lt_int64_constant='(_v_)'
+		lt_uint64_constant='(_v_)'
+		;;
+	$ac_cv_sizeof_long)
+		lt_int64_constant='(_v_##L)'
+		lt_uint64_constant='(_v_##UL)'
+		;;
+	$ac_cv_sizeof_long_long)
+		lt_int64_constant='(_v_##LL)'
+		lt_uint64_constant='(_v_##ULL)'
+		;;
+	esac
+	if test x$ac_cv_c_bigendian = xyes; then
+		lt_bs_native=BE
+		lt_bs_alien=LE
+	else
+		lt_bs_native=LE
+		lt_bs_alien=BE
+	fi
 ])
 
 AC_CONFIG_FILES([
@@ -434,11 +500,13 @@ AC_CONFIG_FILES([
 	extensions/Makefile
 	liblangtag/Makefile
 	liblangtag-gobject/Makefile
+	liblangtag-xml/Makefile
 	liblangtag.pc
 	liblangtag-uninstalled.pc
 	liblangtag-gobject.pc
 	liblangtag-gobject-uninstalled.pc
 	tests/Makefile
+	util/Makefile
 ])
 AC_OUTPUT
 
