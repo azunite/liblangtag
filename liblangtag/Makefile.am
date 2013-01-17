@@ -203,6 +203,7 @@ liblangtag_la_CFLAGS =				\
 liblangtag_la_LIBADD =						\
 	$(LIBS)							\
 	$(included_modules)					\
+	@MODULE_LIBS@ 							\
 	$(NULL)
 liblangtag_la_DEPENDENCIES =					\
 	$(included_modules)					\
