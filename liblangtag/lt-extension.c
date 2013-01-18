@@ -87,6 +87,7 @@ lt_extension_add_singleton(lt_extension_t  *extension,
 	lt_return_val_if_fail (singleton_c != 'X' && singleton_c != 'x', FALSE);
 	lt_return_val_if_fail (!lt_extension_has_singleton(extension, singleton_c), FALSE);
 	lt_return_val_if_fail (singleton >= 0, FALSE);
+	lt_return_val_if_fail (singleton < LT_MAX_EXT_MODULES, FALSE);
 
 	m = lt_ext_module_lookup(singleton_c);
 	d = lt_ext_module_create_data(m);

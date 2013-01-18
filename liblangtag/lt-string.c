@@ -144,11 +144,13 @@ lt_string_free(lt_string_t *string,
 {
 	char *retval = NULL;
 
-	if (!free_segment) {
-		lt_mem_remove_ref(&string->parent, string->string);
-		retval = string->string;
+	if (string) {
+		if (!free_segment) {
+			lt_mem_remove_ref(&string->parent, string->string);
+			retval = string->string;
+		}
+		lt_string_unref(string);
 	}
-	lt_string_unref(string);
 
 	return retval;
 }
@@ -313,6 +315,7 @@ lt_string_append_filename(lt_string_t *string,
 		lt_string_append(string, p);
 		p = (const char *)va_arg(ap, const char *);
 	}
+	va_end(ap);
 
 	return string;
 }

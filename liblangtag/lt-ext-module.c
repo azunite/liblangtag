@@ -453,6 +453,7 @@ lt_ext_module_lookup(char singleton_c)
 	int singleton = lt_ext_module_singleton_char_to_int(singleton_c);
 
 	lt_return_val_if_fail (singleton >= 0, NULL);
+	lt_return_val_if_fail (signleton < LT_MAX_EXT_MODULES, NULL);
 	lt_return_val_if_fail (__lt_ext_module_initialized, NULL);
 
 	if (!__lt_ext_modules[singleton])

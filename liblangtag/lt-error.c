@@ -113,18 +113,21 @@ lt_error_set(lt_error_t      **error,
 #if HAVE_BACKTRACE
 	void *traces[1024];
 #endif
-	lt_error_data_t *d = lt_mem_alloc_object(sizeof (lt_error_data_t));
+	lt_error_data_t *d;
 	int size = 0;
 	lt_bool_t allocated;
 
 	lt_return_val_if_fail (error != NULL, NULL);
 
+	d = lt_mem_alloc_object(sizeof (lt_error_data_t));
 	if (!d)
 		goto bail0;
 	if (!*error)
 		*error = lt_error_new();
-	if (!*error)
+	if (!*error) {
+		lt_mem_unref(d);
 		goto bail0;
+	}
 
 	d->type = type;
 	va_start(ap, message);

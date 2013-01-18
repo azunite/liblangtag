@@ -145,7 +145,10 @@ _parse(const char *filename,
 						goto multiline;
 					} else {
 						buffer[len] = 0;
-						fsetpos(fp, &pos);
+						if (fsetpos(fp, &pos) == -1) {
+							lt_critical("Unable to parse mutliple line");
+							return FALSE;
+						}
 					}
 					token = strstr(buffer, ": ");
 					tag = lt_strndup(buffer, token - buffer);

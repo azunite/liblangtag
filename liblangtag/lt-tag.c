@@ -1600,8 +1600,6 @@ lt_tag_canonicalize(lt_tag_t    *tag,
 
 		if (tag_string == NULL || tag_string[0] == 0)
 			break;
-		if (r)
-			lt_redundant_unref(r);
 		r = lt_redundant_db_lookup(rdb, tag_string);
 		if (r) {
 			const char *preferred = lt_redundant_get_preferred_tag(r);
@@ -1891,7 +1889,7 @@ lt_tag_compare(const lt_tag_t *v1,
 		lt_variant_t *vv1, *vv2;
 
 		vv1 = l1 ? lt_list_value(l1) : NULL;
-		vv2 = l2 ? lt_list_value(l2) : NULL;
+		vv2 = lt_list_value(l2);
 		retval &= lt_variant_compare(vv1, vv2);
 		l1 = lt_list_next(l1);
 		l2 = lt_list_next(l2);
