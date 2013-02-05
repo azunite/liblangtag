@@ -68,6 +68,8 @@ AC_SUBST(LT_G_AGE)
 dnl ======================================================================
 dnl define variables
 dnl ======================================================================
+AM_MISSING_PROG([GIT], [git])
+
 LANGTAG_MODULEDIR="${libdir}/liblangtag"
 AC_SUBST(LANGTAG_MODULEDIR)
 
