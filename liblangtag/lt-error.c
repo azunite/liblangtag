@@ -125,7 +125,7 @@ lt_error_set(lt_error_t      **error,
 	if (!*error)
 		*error = lt_error_new();
 	if (!*error) {
-		lt_mem_unref(d);
+		lt_mem_unref(&d->parent);
 		goto bail0;
 	}
 
