@@ -24,6 +24,7 @@ MAINTAINERCLEANFILES =			\
 	$(srcdir)/ChangeLog		\
 	$(srcdir)/INSTALL		\
 	$(srcdir)/aclocal.m4		\
+	$(srcdir)/ar-lib		\
 	$(srcdir)/config.guess		\
 	$(srcdir)/config.h.in		\
 	$(srcdir)/config.sub		\
