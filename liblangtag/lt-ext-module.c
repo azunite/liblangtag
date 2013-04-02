@@ -262,7 +262,7 @@ lt_ext_module_load(lt_ext_module_t *module)
 					       (lt_destroy_func_t)dlclose);
 				func = dlsym(module->module, "module_get_version");
 				if (!func) {
-					lt_warning(dlerror());
+					lt_warning("%s", dlerror());
 					break;
 				}
 				if (((lt_ext_module_version_func_t)func)() != LT_EXT_MODULE_VERSION) {
@@ -272,7 +272,7 @@ lt_ext_module_load(lt_ext_module_t *module)
 				}
 				func = dlsym(module->module, "module_get_funcs");
 				if (!func) {
-					lt_warning(dlerror());
+					lt_warning("%s", dlerror());
 					break;
 				}
 				if (!(module->funcs = ((lt_ext_module_get_funcs_func_t)func)())) {
