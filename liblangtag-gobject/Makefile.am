@@ -173,11 +173,13 @@ LangTag_0_4_gir_INCLUDES =		\
 	GLib-2.0			\
 	GObject-2.0			\
 	$(NULL)
-LangTag_0_4_gir_CFLAGS =		\
-	$(INCLUDES)			\
+LangTag_0_4_gir_SCANNERFLAGS =		\
 	--symbol-prefix=lt		\
 	--identifier-prefix=Lt		\
 	-v				\
+	$(NULL)
+LangTag_0_4_gir_CFLAGS =		\
+	$(INCLUDES)			\
 	$(NULL)
 LangTag_0_4_gir_LIBS =			\
 	liblangtag-gobject.la		\
