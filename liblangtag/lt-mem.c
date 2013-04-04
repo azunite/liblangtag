@@ -212,9 +212,10 @@ lt_mem_add_ref(lt_mem_t          *object,
 	       lt_pointer_t       p,
 	       lt_destroy_func_t  func)
 {
-	lt_return_if_fail (object != NULL);
-	lt_return_if_fail (p != NULL);
-	lt_return_if_fail (func != NULL);
+	if (!object ||
+	    !p ||
+	    !func)
+		return;
 
 	object->refs = lt_mem_slist_append(object->refs, p, func);
 }
