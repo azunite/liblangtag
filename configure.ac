@@ -206,7 +206,7 @@ dnl functions testing
 dnl ======================================================================
 AX_CREATE_STDINT_H([liblangtag/lt-stdint.h])
 AC_CHECK_HEADERS([dirent.h execinfo.h libgen.h sys/param.h])
-AC_CHECK_FUNCS([backtrace strndup vasprintf vsnprintf])
+AC_CHECK_FUNCS([backtrace getegid geteuid getgid getuid __secure_getenv secure_getenv strndup vasprintf vsnprintf])
 AC_CHECK_VA_COPY
 
 if test "x$ac_cv_func_vsnprintf" = xyes; then

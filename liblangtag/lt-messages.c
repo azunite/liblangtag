@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lt-messages.h"
+#include "lt-utils.h"
 
 static void _lt_message_default_handler(lt_message_type_t      type,
 					lt_message_flags_t     flags,
@@ -189,7 +190,7 @@ lt_message_is_enabled(lt_message_category_t category)
 	const char *env;
 
 	if (!cache) {
-		env = getenv("LT_DEBUG");
+		env = lt_getenv("LT_DEBUG");
 		if (env)
 			mask = atoi(env);
 		cache = TRUE;

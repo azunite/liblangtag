@@ -24,6 +24,7 @@
 
 LT_BEGIN_DECLS
 
+char *lt_getenv        (const char *name);
 int   lt_strcmp0       (const char *v1,
                         const char *v2);
 int   lt_strcasecmp    (const char *s1,

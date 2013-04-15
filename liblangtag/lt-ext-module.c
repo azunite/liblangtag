@@ -215,7 +215,7 @@ lt_ext_module_load(lt_ext_module_t *module)
 	char *filename = lt_strdup_printf("liblangtag-ext-%s." LT_MODULE_SUFFIX,
 					  module->name);
 	char *path_list, *p, *s, *path;
-	const char *env = getenv("LANGTAG_EXT_MODULE_PATH");
+	const char *env = lt_getenv("LANGTAG_EXT_MODULE_PATH");
 	size_t len;
 
 	if (!env) {
@@ -568,7 +568,7 @@ void
 lt_ext_modules_load(void)
 {
 #if ENABLE_MODULE
-	const char *env = getenv("LANGTAG_EXT_MODULE_PATH");
+	const char *env = lt_getenv("LANGTAG_EXT_MODULE_PATH");
 	char *path_list, *s, *p, *path;
 	size_t suffix_len = strlen(LT_MODULE_SUFFIX) + 1;
 

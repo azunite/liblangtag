@@ -23,13 +23,38 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
+#include <unistd.h>
+#include <sys/types.h>
 #include "lt-messages.h"
 #include "lt-utils.h"
 
 
 /*< private >*/
+LT_INLINE_FUNC char *
+_lt_secure_getenv(const char *name)
+{
+#if defined(HAVE_GETUID) && defined(HAVE_GETEUID) && defined(HAVE_GETGID) && defined(HAVE_GETEGID)
+	if (getuid() != geteuid() ||
+	    getgid() != getegid())
+		return NULL;
+#endif
+	return getenv(name);
+}
 
 /*< public >*/
+char *
+lt_getenv(const char *name)
+{
+#ifndef HAVE_SECURE_GETENV
+#  ifdef HAVE___SECURE_GETENV
+#    define secure_getenv __secure_getenv
+#  else
+#    define secure_getenv _lt_secure_getenv
+#  endif
+#endif
+	return secure_getenv(name);
+}
+
 int
 lt_strcmp0(const char *v1,
 	   const char *v2)
