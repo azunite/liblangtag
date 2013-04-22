@@ -406,13 +406,12 @@ lt_extension_compare(const lt_extension_t *v1,
 
 	if (v1 == v2)
 		return TRUE;
+	/* matching the wildcard each other */
+	if ((v1 && v1->extensions[LT_MAX_EXT_MODULES - 1]) ||
+	    (v2 && v2->extensions[LT_MAX_EXT_MODULES - 1]))
+		return TRUE;
 	if (!v1 || !v2)
 		return FALSE;
-
-	/* matching the wildcard each other */
-	if (v1->extensions[LT_MAX_EXT_MODULES - 1] ||
-	    v2->extensions[LT_MAX_EXT_MODULES - 1])
-		return TRUE;
 
 	for (i = 0; i < LT_MAX_EXT_MODULES - 2; i++) {
 		if ((!v1->extensions[i] && v2->extensions[i]) ||
