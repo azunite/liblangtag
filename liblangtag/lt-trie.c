@@ -81,7 +81,7 @@ lt_trie_node_add(lt_trie_node_t    *node,
 	lt_return_val_if_fail (node != NULL, FALSE);
 	lt_return_val_if_fail (key != NULL, FALSE);
 
-	index_ = *key - 1;
+	index_ = (unsigned char)*key - 1;
 	if (*key == 0) {
 		if (node->data && !replace) {
 			return FALSE;
@@ -120,7 +120,7 @@ lt_trie_node_remove(lt_trie_node_t *node,
 	lt_return_val_if_fail (node != NULL, FALSE);
 	lt_return_val_if_fail (key != NULL, FALSE);
 
-	index_ = *key - 1;
+	index_ = (unsigned char)*key - 1;
 	if (*key == 0) {
 		if (!node->data)
 			return FALSE;
@@ -148,7 +148,7 @@ lt_trie_node_lookup(lt_trie_node_t *node,
 	lt_return_val_if_fail (node != NULL, NULL);
 	lt_return_val_if_fail (key != NULL, NULL);
 
-	index_ = *key - 1;
+	index_ = (unsigned char)*key - 1;
 	if (*key == 0)
 		return node->data;
 	if (!node->node[index_])
