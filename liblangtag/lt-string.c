@@ -46,18 +46,22 @@ lt_bool_t
 _lt_string_expand(lt_string_t *string,
 		  size_t       size)
 {
-	string->allocated_len += LT_ALIGNED_TO_POINTER (size + LT_STRING_SIZE);
-	lt_mem_remove_ref(&string->parent, string->string);
-	string->string = realloc(string->string, string->allocated_len);
-	if (!string->string) {
-		string->len = 0;
-		string->allocated_len = 0;
+	char *s;
+	size_t n = string->allocated_len;
+	lt_bool_t retval = TRUE;
 
-		return FALSE;
+	n += LT_ALIGNED_TO_POINTER (size + LT_STRING_SIZE);
+	lt_mem_remove_ref(&string->parent, string->string);
+	s = realloc(string->string, n);
+	if (s) {
+		string->string = s;
+		string->allocated_len = n;
+	} else {
+		retval = FALSE;
 	}
 	lt_mem_add_ref(&string->parent, string->string, free);
 
-	return TRUE;
+	return retval;
 }
 
 /*< protected >*/
