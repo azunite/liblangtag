@@ -1,10 +1,19 @@
-0.4.0 ->
+0.4.0 -> 0.5.0
 =================
 * Enhancements:
   * Iterator support
+  * Add lt_tag_convert_from_locale_string()
 * Bug Fixes:
   * Fix wrong traversal on keys
   * Fix xml parser for tags in range
+  * Improve portability
+  * Fix broken lt_tag_transform()
+  * Fix the build issue when builddir != srcdir
+  * Fix broken lt_tag_convert_from_locale()
+  * Fix memory leaks
+  * Fix linker issue
+  * Use secure_getenv if available
+  * more
 
 0.3 -> 0.4
 =============
