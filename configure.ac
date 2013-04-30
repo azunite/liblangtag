@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.62)
-AC_INIT([liblangtag], 0.5.0, [http://github.com/tagoh/liblangtag/issues])
+AC_INIT([liblangtag], 0.5.1, [http://github.com/tagoh/liblangtag/issues])
 
 . `dirname $0`/requires
 
@@ -49,9 +49,9 @@ dnl    then set CURRENT to the so number +1 and set AGE to 0.
 dnl
 
 dnl for liblangtag.la
-LT_CURRENT=2
+LT_CURRENT=3
 LT_REVISION=0
-LT_AGE=1
+LT_AGE=2
 
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
