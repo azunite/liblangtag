@@ -360,3 +360,26 @@ lt_trie_keys(lt_trie_t *trie)
 
 	return retval;
 }
+
+lt_trie_iter_t *
+lt_trie_iter_init(lt_trie_iter_t *iter,
+		  lt_trie_t      *trie)
+{
+	/* Do nothing. just to keep ABI compatible. */
+	return NULL;
+}
+
+void
+lt_trie_iter_finish(lt_trie_iter_t *iter)
+{
+	/* Do nothing. just to keep ABI compatible. */
+}
+
+lt_bool_t
+lt_trie_iter_next(lt_trie_iter_t *iter,
+		  lt_pointer_t   *key,
+		  lt_pointer_t   *value)
+{
+	/* Do nothing. just to keep ABI compatible. */
+	return FALSE;
+}
