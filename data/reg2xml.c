@@ -147,6 +147,7 @@ _parse(const char *filename,
 						buffer[len] = 0;
 						if (fsetpos(fp, &pos) == -1) {
 							lt_critical("Unable to parse mutliple line");
+							fclose(fp);
 							return FALSE;
 						}
 					}
@@ -177,6 +178,8 @@ _parse(const char *filename,
 			}
 		}
 	}
+
+	fclose(fp);
 
 	return TRUE;
 }
