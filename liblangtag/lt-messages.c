@@ -85,8 +85,12 @@ _lt_message_get_prefix(lt_message_type_t     type,
 	clen = strlen(cs);
 	if (clen > 0) {
 		catstring = malloc(sizeof (char) * (clen + 6));
-		snprintf(catstring, clen + 6, "[%s]: ", cs);
-		clen = strlen(catstring);
+		if (catstring) {
+			snprintf(catstring, clen + 6, "[%s]: ", cs);
+			clen = strlen(catstring);
+		} else {
+			clen = 0;
+		}
 	}
 	len = tlen + clen + 1;
 	retval = malloc(sizeof (char) * len);
