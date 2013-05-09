@@ -1970,6 +1970,8 @@ lt_tag_lookup(const lt_tag_t  *tag,
 	lt_return_val_if_fail (pattern != NULL, NULL);
 
 	t2 = lt_tag_new();
+	lt_return_val_if_fail (t2 != NULL, NULL);
+
 	state = lt_tag_parse_wildcard(t2, pattern, &err);
 	if (err)
 		goto bail;
@@ -2043,8 +2045,7 @@ lt_tag_lookup(const lt_tag_t  *tag,
 			lt_error_print(err, LT_ERR_ANY);
 		lt_error_unref(err);
 	}
-	if (t2)
-		lt_tag_unref(t2);
+	lt_tag_unref(t2);
 
 	return retval;
 }
