@@ -40,8 +40,8 @@ typedef enum _lt_xml_cldr_t {
 lt_xml_t        *lt_xml_new                (void);
 lt_xml_t        *lt_xml_ref                (lt_xml_t      *xml);
 void             lt_xml_unref              (lt_xml_t      *xml);
-const xmlDocPtr  lt_xml_get_subtag_registry(lt_xml_t      *xml);
-const xmlDocPtr  lt_xml_get_cldr           (lt_xml_t      *xml,
+xmlDocPtr        lt_xml_get_subtag_registry(lt_xml_t      *xml);
+xmlDocPtr        lt_xml_get_cldr           (lt_xml_t      *xml,
                                             lt_xml_cldr_t  type);
 
 LT_END_DECLS

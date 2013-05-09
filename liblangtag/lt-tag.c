@@ -1060,7 +1060,7 @@ _lt_tag_convert_variant_from_locale_modifier(const char  *modifier,
 	return FALSE;
 }
 
-static const char * const
+static const char *
 _lt_tag_convert_privaseuse_from_locale_modifier(const char *modifier)
 {
 	/* XXX: think about how to get rid of the hardcoded mapping table */

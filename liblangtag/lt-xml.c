@@ -422,7 +422,7 @@ lt_xml_unref(lt_xml_t *xml)
 		lt_mem_unref(&xml->parent);
 }
 
-const xmlDocPtr
+xmlDocPtr
 lt_xml_get_subtag_registry(lt_xml_t *xml)
 {
 	lt_return_val_if_fail (xml != NULL, NULL);
@@ -430,7 +430,7 @@ lt_xml_get_subtag_registry(lt_xml_t *xml)
 	return xml->subtag_registry;
 }
 
-const xmlDocPtr
+xmlDocPtr
 lt_xml_get_cldr(lt_xml_t      *xml,
 		lt_xml_cldr_t  type)
 {

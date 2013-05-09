@@ -139,7 +139,7 @@ lt_trie_node_remove(lt_trie_node_t *node,
 	return lt_trie_node_remove(node->node[index_], node, key + 1);
 }
 
-static const lt_pointer_t
+static lt_pointer_t
 lt_trie_node_lookup(lt_trie_node_t *node,
 		    const char     *key)
 {
