@@ -675,7 +675,7 @@ lt_tag_parse_state(lt_tag_t    *tag,
 				 lt_string_value(tag->tag_string), token, tag->state);
 		    break;
 	}
-	if (lt_error_is_set(*error, LT_ERR_ANY))
+	if (error && lt_error_is_set(*error, LT_ERR_ANY))
 		retval = FALSE;
 
 	return retval;
