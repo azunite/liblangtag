@@ -1926,6 +1926,8 @@ lt_tag_match(const lt_tag_t  *v1,
 	lt_return_val_if_fail (v2 != NULL, FALSE);
 
 	t2 = lt_tag_new();
+	lt_return_val_if_fail (t2 != NULL, FALSE);
+
 	state = lt_tag_parse_wildcard(t2, v2, &err);
 	if (lt_error_is_set(err, LT_ERR_ANY)) {
 		if (error)
@@ -1937,8 +1939,7 @@ lt_tag_match(const lt_tag_t  *v1,
 	} else {
 		retval = _lt_tag_match(v1, t2, state);
 	}
-	if (t2)
-		lt_tag_unref(t2);
+	lt_tag_unref(t2);
 
 	return retval;
 }
