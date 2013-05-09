@@ -356,7 +356,7 @@ lt_trie_keys(lt_trie_t *trie)
 		retval = lt_list_append(retval, key, free);
 	}
 
-	lt_iter_finish((lt_iter_t *)&iter);
+	lt_iter_finish((lt_iter_t *)iter);
 
 	return retval;
 }
