@@ -72,10 +72,9 @@ lt_iter_ref(lt_iter_t *iter)
 void
 lt_iter_unref(lt_iter_t *iter)
 {
-	lt_iter_tmpl_t *tmpl = iter->target;
+	lt_return_if_fail (iter != NULL);
 
-	if (iter)
-		lt_mem_unref(&tmpl->parent);
+	lt_mem_unref(&iter->target->parent);
 }
 
 /**
