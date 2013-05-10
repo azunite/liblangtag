@@ -1188,8 +1188,10 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 			goto bail;
 		}
 		transform = lt_tag_transform(tag, &err);
-		if (!transform)
+		if (!transform) {
+			lt_string_unref(tag_string);
 			goto bail;
+		}
 		lt_string_clear(tag_string);
 		lt_string_append(tag_string, transform);
 		free(transform);
