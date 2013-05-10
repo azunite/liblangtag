@@ -14,7 +14,7 @@ m4_pattern_allow(^LT_.*_DECLS$)
 m4_pattern_allow(^LT_POINTER_.*$)
 
 AM_MAINTAINER_MODE
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4macros])
 
 AC_USE_SYSTEM_EXTENSIONS
