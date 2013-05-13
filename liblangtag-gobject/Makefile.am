@@ -3,7 +3,7 @@
 ##
 # Global definitions
 NULL =
-INCLUDES =					\
+AM_CPPFLAGS =					\
 	-I$(top_builddir)/liblangtag-gobject/	\
 	-I$(top_builddir)			\
 	-I$(top_srcdir)/liblangtag/		\
@@ -179,7 +179,7 @@ LangTag_0_5_gir_SCANNERFLAGS =		\
 	-v				\
 	$(NULL)
 LangTag_0_5_gir_CFLAGS =		\
-	$(INCLUDES)			\
+	$(AM_CPPFLAGS)			\
 	$(NULL)
 LangTag_0_5_gir_LIBS =			\
 	liblangtag-gobject.la		\

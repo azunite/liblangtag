@@ -2,7 +2,7 @@
 # Global definitions
 NULL =
 SUBDIRS =
-INCLUDES =								\
+AM_CPPFLAGS =								\
 	-I$(top_srcdir)/liblangtag					\
 	-I$(top_srcdir)							\
 	-DTEST_DATADIR="\"$(abs_top_builddir)/data\""			\

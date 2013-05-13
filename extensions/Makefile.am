@@ -1,7 +1,7 @@
 ##
 # Global definitions
 NULL =
-INCLUDES =						\
+AM_CPPFLAGS =						\
 	-I$(top_srcdir)/liblangtag/			\
 	-I$(top_builddir)/liblangtag/			\
 	-I$(top_srcdir)					\
