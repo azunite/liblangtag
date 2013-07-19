@@ -23,7 +23,9 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include "lt-messages.h"
 #include "lt-utils.h"
