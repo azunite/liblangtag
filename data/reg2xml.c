@@ -193,7 +193,6 @@ _output_xml(const char *filename,
 	lt_bool_t retval;
 
 	doc = xmlNewDoc((const xmlChar *)"1.0");
-	doc->encoding = xmlStrdup((const xmlChar *)"UTF-8");
 	root = xmlNewDocNode(doc, NULL,
 			     (const xmlChar *)"registry",
 			     NULL);
