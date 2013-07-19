@@ -171,9 +171,11 @@ lt_strdup_vprintf(const char *format,
 
 		va_end(ap);
 
-		retval = malloc(sizeof (char) * size);
-		if (retval) {
-			vsprintf(retval, format, args);
+		if (size > 0) {
+			retval = malloc(sizeof (char) * size);
+			if (retval) {
+				vsprintf(retval, format, args);
+			}
 		}
 	} LT_STMT_END;
 #elif HAVE_VSNPRINTF
