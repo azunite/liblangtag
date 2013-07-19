@@ -137,7 +137,11 @@ _lt_ext_ldml_u_lookup_type(lt_ext_ldml_u_data_t  *data,
 							if (!strchr(hexdigit, subtag[j]))
 								goto bail2;
 						}
+#if defined(_MSC_VER)
+						x = _strtoui64(subtag, &p, 16);
+#else
 						x = strtoull(subtag, &p, 16);
+#endif
 						if (p && p[0] == 0 && x <= 0x10ffff) {
 							retval = TRUE;
 							xmlFree(name);
