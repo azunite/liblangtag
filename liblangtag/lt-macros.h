@@ -261,7 +261,7 @@
 
 LT_BEGIN_DECLS
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(ssize_t)
 #  ifdef _M_AMD64
 typedef signed long long	ssize_t;
 #  else
