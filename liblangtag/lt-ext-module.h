@@ -127,6 +127,14 @@ typedef char * (* lt_ext_module_get_tag_func_t)   (lt_ext_module_data_t *data);
  */
 typedef lt_bool_t (* lt_ext_module_validate_func_t)  (lt_ext_module_data_t *data);
 
+/* For some yet unknown reason the MSVC compiler does not like the const
+ * typedef'ed function pointers in the _lt_ext_module_funcs_t struct below. */
+#ifdef _MSC_VER
+#define LT_CONST_DECL
+#else
+#define LT_CONST_DECL const
+#endif
+
 /**
  * lt_ext_module_funcs_t:
  * @get_singleton: A callback function to obtain the singleton character
@@ -143,12 +151,12 @@ typedef lt_bool_t (* lt_ext_module_validate_func_t)  (lt_ext_module_data_t *data
  * and #lt_ext_module_t and extend features.
  */
 struct _lt_ext_module_funcs_t {
-	const lt_ext_module_singleton_func_t get_singleton;
-	const lt_ext_module_data_new_func_t  create_data;
-	const lt_ext_module_precheck_func_t  precheck_tag;
-	const lt_ext_module_parse_func_t     parse_tag;
-	const lt_ext_module_get_tag_func_t   get_tag;
-	const lt_ext_module_validate_func_t  validate_tag;
+	LT_CONST_DECL lt_ext_module_singleton_func_t get_singleton;
+	LT_CONST_DECL lt_ext_module_data_new_func_t  create_data;
+	LT_CONST_DECL lt_ext_module_precheck_func_t  precheck_tag;
+	LT_CONST_DECL lt_ext_module_parse_func_t     parse_tag;
+	LT_CONST_DECL lt_ext_module_get_tag_func_t   get_tag;
+	LT_CONST_DECL lt_ext_module_validate_func_t  validate_tag;
 };
 
 
