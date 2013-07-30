@@ -23,7 +23,9 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include "lt-messages.h"
 #include "lt-utils.h"
@@ -171,9 +173,11 @@ lt_strdup_vprintf(const char *format,
 
 		va_end(ap);
 
-		retval = malloc(sizeof (char) * size);
-		if (retval) {
-			vsprintf(retval, format, args);
+		if (size > 0) {
+			retval = malloc(sizeof (char) * size);
+			if (retval) {
+				vsprintf(retval, format, args);
+			}
 		}
 	} LT_STMT_END;
 #elif HAVE_VSNPRINTF
