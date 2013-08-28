@@ -1,3 +1,42 @@
+0.5.1 -> 0.5.2
+=================
+Akira TAGOH (6):
+      Replace AM_CONFIG_HEADER with AC_CONFIG_HEADERS
+      Merge commit '8532462c5354b66848e387a7d435ca5dadbf768c' into 0.5.x
+      Merged in juikim/liblangtag/0.5.x (pull request #3)
+      Use AM_CPPFLAGS instead of INCLUDES
+      Merged in erAck/liblangtag/0.5.x-libreoffice (pull request #4)
+      Fix duplicate definition of EXTRA_DIST
+
+David Tardon (10):
+      fix automake error
+      coverity: free the iter, not _pointer_ to it
+      coverity: check if error is non-null before using it
+      coverity: check return value of malloc
+      coverity: returning ptr as const is meaningless
+      coverity: free string in case of error
+      coverity: close file handle
+      coverity: check ptr before it is used
+      coverity: check ptr before it is used
+      coverity: check ptr before it is used
+
+Eike Rathke (11):
+      check return value of C99 vsnprintf()
+      check for MSVC defined ssize_t
+      MSVC-32 has _snprintf() instead of snprintf()
+      MSVC has _strtoui64() instead of strtoull()
+      variable declarations need to be at beginning of scope
+      undefined HAVE_SYS_PARAM_H
+      automatically appending dir separator does not work on Windows
+      check for HAVE_UNISTD_H
+      do not specify a document encoding to avoid garbage conversion
+      MSVC does not like const typedef'ed function pointers
+      Revert "do not specify a document encoding to avoid garbage conversion"
+
+Jung-uk Kim (2):
+      Use awk(1) instead of sed(1) to fix build on *BSD.
+      Fix duplicate typedef introduced in 57c47aa.
+
 0.5.0 -> 0.5.1
 =================
 * Fix ABI breakage.
