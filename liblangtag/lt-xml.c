@@ -197,7 +197,7 @@ lt_xml_read_cldr_supplemental(lt_xml_t     *xml,
 		lt_string_append_filename(regfile,
 					  BUILDDIR, "data", "common", "supplemental",
 					  filename, NULL);
-		lt_info(lt_string_value(regfile));
+		lt_info("%s", lt_string_value(regfile));
 		if (stat(lt_string_value(regfile), &st) == -1) {
 			lt_string_clear(regfile);
 			lt_string_append_filename(regfile,

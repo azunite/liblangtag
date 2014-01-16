@@ -73,7 +73,7 @@ void              lt_message_vprintf            (lt_message_type_t      type,
 						 lt_message_flags_t     flags,
                                                  lt_message_category_t  category,
                                                  const char            *format,
-                                                 va_list                args);
+                                                 va_list                args) LT_GNUC_PRINTF(4, 0);
 void              lt_return_if_fail_warning     (const char            *pretty_function,
 						 const char            *expression);
 

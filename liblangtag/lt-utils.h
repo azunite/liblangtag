@@ -36,7 +36,7 @@ char *lt_strlower      (char       *string);
 char *lt_strdup_printf (const char *format,
 			...) LT_GNUC_PRINTF (1, 2);
 char *lt_strdup_vprintf(const char *format,
-                        va_list     args);
+                        va_list     args) LT_GNUC_PRINTF (1, 0);
 char *lt_strndup       (const char *s,
 			size_t      n);
 
