@@ -53,8 +53,8 @@ main(int    argc,
 		}
 		lt_iter_finish(iter);
 	} else if (lt_strcmp0(argv[1], "lookup") == 0) {
-		variant = lt_variant_db_lookup(variantdb, argv[2]);
 		const lt_list_t *prefix, *l;
+		variant = lt_variant_db_lookup(variantdb, argv[2]);
 
 		if (variant) {
 			printf("desc: %s\n", lt_variant_get_name(variant));

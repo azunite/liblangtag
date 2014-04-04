@@ -37,7 +37,7 @@ logger(lt_message_type_t      type,
        const char            *message,
        lt_pointer_t           user_data)
 {
-	lt_error_set(&error, type, "%s", message);
+	lt_error_set(&error, LT_ERR_INVALID, "%s", message);
 }
 
 static void

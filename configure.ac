@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.62)
-AC_INIT([liblangtag], 0.5.1, [http://github.com/tagoh/liblangtag/issues])
+AC_INIT([liblangtag], 0.5.2, [http://github.com/tagoh/liblangtag/issues])
 
 . `dirname $0`/requires
 
@@ -13,6 +13,9 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 m4_pattern_allow(^LT_.*_DECLS$)
 m4_pattern_allow(^LT_POINTER_.*$)
 
+LT_PREREQ([2.2])
+LT_INIT([disable-static win32-dll])
+
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4macros])
@@ -20,7 +23,6 @@ AC_CONFIG_MACRO_DIR([m4macros])
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AM_PROG_AR
-AC_PROG_LIBTOOL
 
 GNOME_COMPILE_WARNINGS
 

@@ -14,7 +14,7 @@
 #error "Only <liblangtag/langtag.h> can be included directly."
 #endif
 
-#if HAVE_SYS_PARAM_H
+#if defined(HAVE_SYS_PARAM_H) && HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
@@ -261,7 +261,7 @@
 
 LT_BEGIN_DECLS
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(ssize_t)
 #  ifdef _M_AMD64
 typedef signed long long	ssize_t;
 #  else
