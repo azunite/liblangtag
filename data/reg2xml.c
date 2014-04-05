@@ -48,6 +48,7 @@ _parse(const char *filename,
 	FILE *fp;
 	char buffer[1024], *range = NULL, *begin = NULL, *end = NULL;
 	lt_bool_t in_entry = FALSE;
+	lt_bool_t file_end = FALSE;
 	xmlNodePtr ent = NULL;
 
 	if ((fp = fopen(filename, "rb")) == NULL) {
@@ -56,10 +57,13 @@ _parse(const char *filename,
 	}
 	while (1) {
 		fgets(buffer, 1024, fp);
-		if (feof(fp))
-			break;
+		if (feof(fp)) {
+            if (!in_entry)
+                break;
+            file_end = TRUE;
+        }
 		_drop_crlf(buffer);
-		if (lt_strcmp0(buffer, "%%") == 0) {
+		if (lt_strcmp0(buffer, "%%") == 0 || file_end) {
 			if (in_entry) {
 				if (ent) {
 					if (range) {
@@ -102,7 +106,7 @@ _parse(const char *filename,
 				ent = NULL;
 				range = NULL;
 			}
-			in_entry = TRUE;
+			in_entry = !file_end;
 		} else {
 			if (!in_entry) {
 				/* ignore it */
