@@ -1226,6 +1226,158 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 	return tag;
 }
 
+static char *
+_lt_tag_canonicalize(lt_tag_t    *tag,
+		     lt_bool_t    extlang_form,
+		     lt_error_t **error)
+{
+	char *retval = NULL;
+	lt_string_t *string = NULL;
+	lt_error_t *err = NULL;
+	lt_list_t *l;
+	lt_redundant_db_t *rdb = NULL;
+	lt_redundant_t *r = NULL;
+	lt_tag_t *ctag = NULL;
+
+	lt_return_val_if_fail (tag != NULL, NULL);
+
+	string = lt_string_new(NULL);
+	if (tag->grandfathered) {
+		lt_string_append(string, lt_grandfathered_get_better_tag(tag->grandfathered));
+		goto bail1;
+	}
+
+	ctag = lt_tag_copy(tag);
+	rdb = lt_db_get_redundant();
+	while (1) {
+		const char *tag_string = lt_tag_get_string(ctag);
+
+		if (tag_string == NULL || tag_string[0] == 0)
+			break;
+		r = lt_redundant_db_lookup(rdb, tag_string);
+		if (r) {
+			const char *preferred = lt_redundant_get_preferred_tag(r);
+
+			if (preferred) {
+				lt_tag_t *rtag = lt_tag_new();
+				lt_tag_t *ntag = lt_tag_new();
+
+				if (!lt_tag_parse(rtag, lt_redundant_get_tag(r), &err)) {
+					lt_tag_unref(rtag);
+					lt_tag_unref(ntag);
+					goto bail1;
+				}
+				if (!lt_tag_parse(ntag, preferred, &err)) {
+					lt_tag_unref(rtag);
+					lt_tag_unref(ntag);
+					goto bail1;
+				}
+				_lt_tag_subtract(tag, rtag);
+				_lt_tag_replace(tag, ntag);
+				lt_tag_unref(rtag);
+				lt_tag_unref(ntag);
+			}
+			break;
+		} else {
+			if (!lt_tag_truncate(ctag, &err))
+				goto bail1;
+		}
+	}
+
+	if (tag->language) {
+		size_t len;
+		lt_extlang_db_t *edb = lt_db_get_extlang();
+		lt_extlang_t *e;
+
+		if (extlang_form) {
+			/* If the language tag starts with a primary language subtag
+			 * that is also an extlang subtag, then the language tag is
+			 * prepended with the extlang's 'Prefix'.
+			 */
+			e = lt_extlang_db_lookup(edb, lt_lang_get_better_tag(tag->language));
+			if (e) {
+				const char *prefix = lt_extlang_get_prefix(e);
+
+				if (prefix)
+					lt_string_append_printf(string, "%s-", prefix);
+				lt_extlang_unref(e);
+			}
+			lt_extlang_db_unref(edb);
+		}
+
+		lt_string_append(string, lt_lang_get_better_tag(tag->language));
+		if (tag->extlang) {
+			const char *preferred = lt_extlang_get_preferred_tag(tag->extlang);
+
+			if (preferred) {
+				lt_string_clear(string);
+				lt_string_append(string, preferred);
+			} else {
+				lt_string_append_printf(string, "-%s",
+							lt_extlang_get_tag(tag->extlang));
+			}
+		}
+		if (tag->script) {
+			const char *script = lt_script_get_tag(tag->script);
+			const char *suppress = lt_lang_get_suppress_script(tag->language);
+
+			if (!suppress ||
+			    lt_strcasecmp(suppress, script))
+				lt_string_append_printf(string, "-%s", script);
+		}
+		if (tag->region) {
+			lt_string_append_printf(string, "-%s", lt_region_get_better_tag(tag->region));
+		}
+		len = lt_string_length(string);
+		for (l = tag->variants; l != NULL; l = lt_list_next(l)) {
+			lt_variant_t *variant = lt_list_value(l);
+			const char *better = lt_variant_get_better_tag(variant);
+			const char *s = lt_variant_get_tag(variant);
+
+			if (better && lt_strcasecmp(s, better) != 0) {
+				/* ignore all of variants prior to this one */
+				lt_string_truncate(string, len);
+			}
+			lt_string_append_printf(string, "-%s", better ? better : s);
+		}
+		if (tag->extension) {
+			char *s = lt_extension_get_canonicalized_tag(tag->extension);
+
+			lt_string_append_printf(string, "-%s", s);
+			free(s);
+		}
+	}
+	if (tag->privateuse && lt_string_length(tag->privateuse) > 0) {
+		lt_string_append_printf(string, "%s%s",
+					lt_string_length(string) > 0 ? "-" : "",
+					lt_string_value(tag->privateuse));
+	}
+	if (lt_string_length(string) == 0) {
+		lt_error_set(&err, LT_ERR_NO_TAG,
+			     "No tag to convert.");
+	}
+  bail1:
+	if (ctag)
+		lt_tag_unref(ctag);
+	if (rdb)
+		lt_redundant_db_unref(rdb);
+	if (r)
+		lt_redundant_unref(r);
+	retval = lt_string_free(string, FALSE);
+	if (lt_error_is_set(err, LT_ERR_ANY)) {
+		if (error)
+			*error = lt_error_ref(err);
+		else
+			lt_error_print(err, LT_ERR_ANY);
+		lt_error_unref(err);
+		if (retval)
+			free(retval);
+		retval = NULL;
+	}
+
+	return retval;
+}
+
 /*< protected >*/
 lt_tag_state_t
 lt_tag_parse_wildcard(lt_tag_t    *tag,
@@ -1576,149 +1728,24 @@ char *
 lt_tag_canonicalize(lt_tag_t    *tag,
 		    lt_error_t **error)
 {
-	char *retval = NULL;
-	lt_string_t *string = NULL;
-	lt_error_t *err = NULL;
-	lt_list_t *l;
-	lt_redundant_db_t *rdb = NULL;
-	lt_redundant_t *r = NULL;
-	lt_tag_t *ctag = NULL;
+	return _lt_tag_canonicalize(tag, FALSE, error);
+}
 
-	lt_return_val_if_fail (tag != NULL, NULL);
-
-	string = lt_string_new(NULL);
-	if (tag->grandfathered) {
-		lt_string_append(string, lt_grandfathered_get_better_tag(tag->grandfathered));
-		goto bail1;
-	}
-
-	ctag = lt_tag_copy(tag);
-	rdb = lt_db_get_redundant();
-	while (1) {
-		const char *tag_string = lt_tag_get_string(ctag);
-
-		if (tag_string == NULL || tag_string[0] == 0)
-			break;
-		r = lt_redundant_db_lookup(rdb, tag_string);
-		if (r) {
-			const char *preferred = lt_redundant_get_preferred_tag(r);
-
-			if (preferred) {
-				lt_tag_t *rtag = lt_tag_new();
-				lt_tag_t *ntag = lt_tag_new();
-
-				if (!lt_tag_parse(rtag, lt_redundant_get_tag(r), &err)) {
-					lt_tag_unref(rtag);
-					lt_tag_unref(ntag);
-					goto bail1;
-				}
-				if (!lt_tag_parse(ntag, preferred, &err)) {
-					lt_tag_unref(rtag);
-					lt_tag_unref(ntag);
-					goto bail1;
-				}
-				_lt_tag_subtract(tag, rtag);
-				_lt_tag_replace(tag, ntag);
-				lt_tag_unref(rtag);
-				lt_tag_unref(ntag);
-			}
-			break;
-		} else {
-			if (!lt_tag_truncate(ctag, &err))
-				goto bail1;
-		}
-	}
-
-	if (tag->language) {
-		size_t len;
-		lt_extlang_db_t *edb = lt_db_get_extlang();
-		lt_extlang_t *e;
-
-		/* If the language tag starts with a primary language subtag
-		 * that is also an extlang subtag, then the language tag is
-		 * prepended with the extlang's 'Prefix'.
-		 */
-		e = lt_extlang_db_lookup(edb, lt_lang_get_better_tag(tag->language));
-		if (e) {
-			const char *prefix = lt_extlang_get_prefix(e);
-
-			if (prefix)
-				lt_string_append_printf(string, "%s-", prefix);
-			lt_extlang_unref(e);
-		}
-		lt_extlang_db_unref(edb);
-
-		lt_string_append(string, lt_lang_get_better_tag(tag->language));
-		if (tag->extlang) {
-			const char *preferred = lt_extlang_get_preferred_tag(tag->extlang);
-
-			if (preferred) {
-				lt_string_clear(string);
-				lt_string_append(string, preferred);
-			} else {
-				lt_string_append_printf(string, "-%s",
-							lt_extlang_get_tag(tag->extlang));
-			}
-		}
-		if (tag->script) {
-			const char *script = lt_script_get_tag(tag->script);
-			const char *suppress = lt_lang_get_suppress_script(tag->language);
-
-			if (!suppress ||
-			    lt_strcasecmp(suppress, script))
-				lt_string_append_printf(string, "-%s", script);
-		}
-		if (tag->region) {
-			lt_string_append_printf(string, "-%s", lt_region_get_better_tag(tag->region));
-		}
-		len = lt_string_length(string);
-		for (l = tag->variants; l != NULL; l = lt_list_next(l)) {
-			lt_variant_t *variant = lt_list_value(l);
-			const char *better = lt_variant_get_better_tag(variant);
-			const char *s = lt_variant_get_tag(variant);
-
-			if (better && lt_strcasecmp(s, better) != 0) {
-				/* ignore all of variants prior to this one */
-				lt_string_truncate(string, len);
-			}
-			lt_string_append_printf(string, "-%s", better ? better : s);
-		}
-		if (tag->extension) {
-			char *s = lt_extension_get_canonicalized_tag(tag->extension);
-
-			lt_string_append_printf(string, "-%s", s);
-			free(s);
-		}
-	}
-	if (tag->privateuse && lt_string_length(tag->privateuse) > 0) {
-		lt_string_append_printf(string, "%s%s",
-					lt_string_length(string) > 0 ? "-" : "",
-					lt_string_value(tag->privateuse));
-	}
-	if (lt_string_length(string) == 0) {
-		lt_error_set(&err, LT_ERR_NO_TAG,
-			     "No tag to convert.");
-	}
-  bail1:
-	if (ctag)
-		lt_tag_unref(ctag);
-	if (rdb)
-		lt_redundant_db_unref(rdb);
-	if (r)
-		lt_redundant_unref(r);
-	retval = lt_string_free(string, FALSE);
-	if (lt_error_is_set(err, LT_ERR_ANY)) {
-		if (error)
-			*error = lt_error_ref(err);
-		else
-			lt_error_print(err, LT_ERR_ANY);
-		lt_error_unref(err);
-		if (retval)
-			free(retval);
-		retval = NULL;
-	}
-
-	return retval;
+/**
+ * lt_tag_canonicalize_in_extlang_form:
+ * @tag: a #lt_tag_t.
+ * @error: (allow-none): a #lt_error_t or %NULL.
+ *
+ * Canonicalize the language tag in the extlang form
+ * according to various information of subtags.
+ *
+ * Returns: a language tag string.
+ */
+char *
+lt_tag_canonicalize_in_extlang_form(lt_tag_t    *tag,
+				    lt_error_t **error)
+{
+	return _lt_tag_canonicalize(tag, TRUE, error);
 }
 
 /**

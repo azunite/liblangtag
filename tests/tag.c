@@ -34,13 +34,21 @@ main(int    argc,
 	if (lt_strcmp0(argv[1], "help") == 0) {
 	  help:
 		printf("Usage: %s <command> ...\n"
-		       "commands: canonicalize, dump, from_locale, lookup, match, to_locale, transform\n",
+		       "commands: canonicalize, ecanonicalize, dump, from_locale, lookup, match, to_locale, transform\n",
 		       argv[0]);
 	} else if (lt_strcmp0(argv[1], "canonicalize") == 0) {
 		char *s;
 
 		if (lt_tag_parse(tag, argv[2], NULL)) {
 			s = lt_tag_canonicalize(tag, NULL);
+			printf("%s -> %s\n", argv[2], s);
+			free(s);
+		}
+	} else if (lt_strcmp0(argv[1], "ecanonicalize") == 0) {
+		char *s;
+
+		if (lt_tag_parse(tag, argv[2], NULL)) {
+			s = lt_tag_canonicalize_in_extlang_form(tag, NULL);
 			printf("%s -> %s\n", argv[2], s);
 			free(s);
 		}

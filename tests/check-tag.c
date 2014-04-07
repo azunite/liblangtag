@@ -109,13 +109,11 @@ TDEF (lt_tag_canonicalize) {
 
 	t1 = lt_tag_new();
 	fail_unless(t1 != NULL, "OOM");
-#if 0 /* which one is correct behavior? gan? or zh-gan? */
 	fail_unless(lt_tag_parse(t1, "zh-gan", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
 	fail_unless(lt_strcmp0(s, "gan") == 0, "Unexpected result to be canonicalized.");
 	free(s);
-#endif
 	fail_unless(lt_tag_parse(t1, "zh-yue", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
@@ -126,13 +124,11 @@ TDEF (lt_tag_canonicalize) {
 	fail_unless(s != NULL, "Unable to be canonicalize.");
 	fail_unless(lt_strcmp0(s, "yue-Hant-HK") == 0, "Unexpected result to be canonicalized.");
 	free(s);
-#if 0 /* which one is correct behavior? cmn? zh-cmn? */
 	fail_unless(lt_tag_parse(t1, "zh-cmn", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
 	fail_unless(lt_strcmp0(s, "cmn") == 0, "Unexpected result to be canonicalized.");
 	free(s);
-#endif
 	fail_unless(lt_tag_parse(t1, "en-Latn-US", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
@@ -176,7 +172,7 @@ TDEF (lt_tag_canonicalize) {
 	fail_unless(lt_tag_parse(t1, "hak-CN", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
-	fail_unless(lt_strcmp0(s, "zh-hak-CN") == 0, "Unexpected result to be canonicalized.");
+	fail_unless(lt_strcmp0(s, "hak-CN") == 0, "Unexpected result to be canonicalized.");
 	free(s);
 	fail_unless(lt_tag_parse(t1, "en-BU", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
@@ -186,10 +182,38 @@ TDEF (lt_tag_canonicalize) {
 	fail_unless(lt_tag_parse(t1, "sgn-BR", NULL), "should be valid langtag.");
 	s = lt_tag_canonicalize(t1, NULL);
 	fail_unless(s != NULL, "Unable to be canonicalize.");
-	fail_unless(lt_strcmp0(s, "sgn-bzs") == 0, "Unexpected result to be canonicalized.");
+	fail_unless(lt_strcmp0(s, "bzs") == 0, "Unexpected result to be canonicalized.");
 	free(s);
 
 	lt_tag_unref(t1);
+} TEND
+
+TDEF (lt_tag_canonicalize_in_extlang_form) {
+	lt_tag_t *t1;
+	char *s;
+
+	t1 = lt_tag_new();
+	fail_unless(t1 != NULL, "OOM");
+	fail_unless(lt_tag_parse(t1, "gan", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize_in_extlang_form(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "zh-gan") == 0, "Unexpected result to be canonicalized.");
+	free(s);
+	fail_unless(lt_tag_parse(t1, "cmn", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize_in_extlang_form(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "zh-cmn") == 0, "Unexpected result to be canonicalized.");
+	free(s);
+	fail_unless(lt_tag_parse(t1, "hak-CN", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize_in_extlang_form(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "zh-hak-CN") == 0, "Unexpected result to be canonicalized.");
+	free(s);
+	fail_unless(lt_tag_parse(t1, "sgn-BR", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize_in_extlang_form(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "sgn-bzs") == 0, "Unexpected result to be canonicalized.");
+	free(s);
 } TEND
 
 TDEF (lt_tag_match) {
@@ -309,6 +333,7 @@ tester_suite(void)
 	T (lt_tag_parse);
 	T (lt_tag_parse_with_extra_token);
 	T (lt_tag_canonicalize);
+	T (lt_tag_canonicalize_in_extlang_form);
 	T (lt_tag_match);
 	T (lt_tag_transform);
 	T (lt_tag_convert_from_locale_string);
