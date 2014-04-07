@@ -13,9 +13,6 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 m4_pattern_allow(^LT_.*_DECLS$)
 m4_pattern_allow(^LT_POINTER_.*$)
 
-LT_PREREQ([2.2])
-LT_INIT([disable-static win32-dll])
-
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4macros])
@@ -29,6 +26,9 @@ GNOME_COMPILE_WARNINGS
 GNOME_COMMON_INIT
 GNOME_DEBUG_CHECK
 GNOME_MAINTAINER_MODE_DEFINES
+
+LT_PREREQ([2.2])
+LT_INIT([disable-static win32-dll])
 
 dnl ======================================================================
 dnl Libraries versioning
