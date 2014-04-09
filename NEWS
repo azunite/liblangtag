@@ -1,3 +1,18 @@
+0.5.2 -> 0.5.3
+=================
+Akira TAGOH (7):
+      add a script to prepare a release
+      Fix non-literal format string issues (fixed issue#5)
+      Fix typo
+      Update autotools macro
+      Merged in erAck/liblangtag/0.5.x (pull request #7)
+      Fix autoconf warning, warning: AC_COMPILE_IFELSE was called before AC_USE_SYSTEM_EXTENSIONS
+      separately canonicalize into the canonical form and the extlang form
+
+Eike Rathke (2):
+      Merged tagoh/liblangtag/0.5.x into 0.5.x
+      resolves #6, include last record in language-subtag-registry.xml
+
 0.5.1 -> 0.5.2
 =================
 Akira TAGOH (6):
