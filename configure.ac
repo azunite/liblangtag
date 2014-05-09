@@ -325,14 +325,16 @@ if test "x$enable_modules" != "xno"; then
 		AC_MSG_ERROR(Unable to determine shared libreary suffix from libtool)
 	fi
 	use_modules=0
-	AC_CHECK_LIB([dl], [dlopen],
-		[AC_CHECK_LIB([dl], [dlsym], [MODULE_LIBS=-ldl; use_modules=1])])
+	
+	AC_CHECK_FUNC([dlopen], [use_modules=1],
+	  [AC_CHECK_LIB([dl], [dlopen],
+		  [AC_CHECK_LIB([dl], [dlsym], [MODULE_LIBS=-ldl; use_modules=1])])])
 
 	AC_SUBST(MODULE_LIBS)
 	AC_DEFINE_UNQUOTED(ENABLE_MODULE, $use_modules, [Use modules])
 	AC_DEFINE_UNQUOTED(LT_MODULE_SUFFIX, "$lt_module_suffix", [Shared library suffix])
 fi
-AM_CONDITIONAL(ENABLE_MODULE, test x$MODULE_LIBS != x)
+AM_CONDITIONAL(ENABLE_MODULE, test $use_modules = 1)
 
 dnl ======================================================================
 dnl options - rebuild-data
