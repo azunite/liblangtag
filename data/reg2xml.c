@@ -58,10 +58,10 @@ _parse(const char *filename,
 	while (1) {
 		fgets(buffer, 1024, fp);
 		if (feof(fp)) {
-            if (!in_entry)
-                break;
-            file_end = TRUE;
-        }
+			if (!in_entry)
+				break;
+			file_end = TRUE;
+		}
 		_drop_crlf(buffer);
 		if (lt_strcmp0(buffer, "%%") == 0 || file_end) {
 			if (in_entry) {
