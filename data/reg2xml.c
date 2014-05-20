@@ -138,17 +138,19 @@ _parse(const char *filename,
 					len = strlen(buffer);
 					fgets(&buffer[len], 1024 - len, fp);
 					if (buffer[len] == ' ') {
-						size_t l, i;
+						size_t l, i, offset = 1;
 
 						_drop_crlf(&buffer[len]);
 						l = strlen(&buffer[len]);
-						for (i = 1; i < l; i++) {
+						if (buffer[len - 1] == '-')
+							offset--;
+						for (i = offset; i < l; i++) {
 							if (buffer[len + i] != ' ')
 								break;
 						}
-						if (i > 1) {
-							memmove(&buffer[len + 1], &buffer[len + i], l - i);
-							buffer[len + l - i + 1] = 0;
+						if (i > offset) {
+							memmove(&buffer[len + offset], &buffer[len + i], l - i);
+							buffer[len + l - i + offset] = 0;
 						}
 						goto multiline;
 					} else {
