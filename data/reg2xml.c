@@ -109,6 +109,10 @@ _parse(const char *filename,
 			in_entry = !file_end;
 		} else {
 			if (!in_entry) {
+				if (strncmp(buffer, "File-Date: ", 11) == 0) {
+					printf("%s\n", &buffer[11]);
+					xmlNewProp(root, (const xmlChar *)"date", (const xmlChar *)&buffer[11]);
+				}
 				/* ignore it */
 				continue;
 			}
