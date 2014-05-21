@@ -104,6 +104,9 @@ if REBUILD_DATA
 noinst_PROGRAMS += reg2xml
 endif
 #
+dist-hook:
+	rm -f $(builddir)/language-subtag-registry*
+
 reg2xml_SOURCES =	\
 	reg2xml.c	\
 	$(NULL)
