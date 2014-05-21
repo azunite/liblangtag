@@ -1,3 +1,12 @@
+0.5.3 -> 0.5.4
+=================
+Akira TAGOH (5):
+      Fix the module build on NetBSD (fixed issue#7)
+      Fix format
+      Add date property to language-subtag-registry.xml
+      Get rid of the extra space in case word-wrapping
+      Remove the language subtag registry file on dist
+
 0.5.2 -> 0.5.3
 =================
 Akira TAGOH (7):
