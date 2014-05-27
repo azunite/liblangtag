@@ -1557,11 +1557,8 @@ lt_tag_copy(const lt_tag_t *tag)
 	if (tag->variants) {
 		lt_list_t *l;
 
-		for (l = tag->variants; l != NULL; l = lt_list_next(l)) {
-			retval->variants = lt_list_append(retval->variants,
-							  lt_variant_ref(lt_list_value(l)),
-							  (lt_destroy_func_t)lt_variant_unref);
-		}
+		for (l = tag->variants; l != NULL; l = lt_list_next(l))
+			lt_tag_set_variant(retval, lt_variant_ref(lt_list_value(l)));
 	}
 	if (tag->extension) {
 		lt_tag_set_extension(retval, lt_extension_copy(tag->extension));
