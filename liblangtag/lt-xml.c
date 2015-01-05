@@ -61,7 +61,7 @@ lt_xml_read_subtag_registry(lt_xml_t  *xml,
 
 		lt_string_append_filename(regfile,
 					  BUILDDIR,
-					  "data", "language-subtag-reegistry.xml", NULL);
+					  "data", "language-subtag-registry.xml", NULL);
 		if (stat(lt_string_value(regfile), &st) == -1) {
 			lt_string_clear(regfile);
 #endif
