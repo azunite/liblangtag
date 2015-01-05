@@ -334,7 +334,7 @@ if test "x$enable_modules" != "xno"; then
 	AC_DEFINE_UNQUOTED(ENABLE_MODULE, $use_modules, [Use modules])
 	AC_DEFINE_UNQUOTED(LT_MODULE_SUFFIX, "$lt_module_suffix", [Shared library suffix])
 fi
-AM_CONDITIONAL(ENABLE_MODULE, test $use_modules = 1)
+AM_CONDITIONAL(ENABLE_MODULE, test x$use_modules = x1)
 
 dnl ======================================================================
 dnl options - rebuild-data
