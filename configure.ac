@@ -12,6 +12,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 m4_pattern_allow(^LT_.*_DECLS$)
 m4_pattern_allow(^LT_POINTER_.*$)
+m4_pattern_allow(^LT_HAVE_.*$)
 
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([config.h])
@@ -382,19 +383,34 @@ CFLAGS="$CFLAGS $WARN_CFLAGS"
 
 AC_CONFIG_COMMANDS([liblangtag/lt-config.h],[
 	outfile=liblangtag/lt-config.h-tmp
-	cat > $outfile <<\____EOS
+	cat > $outfile <<____EOS
 #ifndef __LT_CONFIG_H__
 #define __LT_CONFIG_H__
 
-#include "lt-macros.h"
+#ifdef __cplusplus
+#define LT_HAVE_INLINE	1
+#else /* !__cplusplus */
+$lt_inline
+#endif /* !__cplusplus */
+
+#ifdef __cplusplus
+#define LT_CAN_INLINE	1
 ____EOS
 
-	cat >> $outfile <<____EOS
+	if test x$lt_can_inline = xyes; then
+		cat >>$outfile <<____EOS
+#else /* !__cplusplus */
+#define LT_CAN_INLINE	1
+____EOS
+	fi
 
-LT_BEGIN_DECLS
+	cat >>$outfile <<____EOS
+#endif
+
+#include <liblangtag/lt-macros.h>
 ____EOS
 
-	if test -z "$unknown_sizeof_void_p"; then
+if test -z "$unknown_sizeof_void_p"; then
 	cat >> $outfile<<____EOS
 
 #define LT_POINTER_TO_INT(p)	((int) ${ptoi_cast} (p))
@@ -417,6 +433,18 @@ ____EOS
 		mv $outfile liblangtag/lt-config.h
 	fi
 ],[
+	if test x$lt_cv_hasinline = xyes; then
+	   lt_inline="#define LT_HAVE_INLINE	1"
+	fi
+	if test x$lt_cv_has__inline = xyes; then
+	   lt_inline="\$lt_inline
+#define LT_HAVE__INLINE	1"
+	fi
+	if test x$lt_cv_has__inline__ = xyes; then
+	   lt_inline="\$lt_inline
+#define LT_HAVE__INLINE__	1"
+	fi
+
 	case $ac_cv_sizeof_void_p in
 	$ac_cv_sizeof_int)
 		ptoi_cast=''

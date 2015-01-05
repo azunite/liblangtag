@@ -14,6 +14,7 @@
 #define __LANGTAG_H__
 
 #define __LANGTAG_H__INSIDE
+#include <liblangtag/lt-config.h>
 #include <liblangtag/lt-error.h>
 #include <liblangtag/lt-database.h>
 #include <liblangtag/lt-ext-module.h>
