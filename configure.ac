@@ -54,7 +54,7 @@ dnl
 
 dnl for liblangtag.la
 LT_CURRENT=4
-LT_REVISION=0
+LT_REVISION=1
 LT_AGE=3
 
 AC_SUBST(LT_CURRENT)
