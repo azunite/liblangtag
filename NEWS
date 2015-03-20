@@ -1,3 +1,13 @@
+0.5.4 -> 0.5.5
+=================
+Akira TAGOH (6):
+      Fix a memory leak
+      Fix a typo
+      Fix configure error on specifying --disable-modules
+      Fix a build issue with inline keyword
+      Fix warning on bootstrap
+      Update revision
+
 0.5.3 -> 0.5.4
 =================
 Akira TAGOH (5):
