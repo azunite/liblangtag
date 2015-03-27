@@ -77,7 +77,6 @@ liblangtag_public_headers =			\
 	$(NULL)
 liblangtag_private_headers =			\
 	lt-atomic.h				\
-	lt-config.h				\
 	lt-ext-module-private.h			\
 	lt-extension-private.h			\
 	lt-extlang-private.h			\
@@ -98,6 +97,7 @@ liblangtag_private_headers =			\
 	lt-xml.h				\
 	$(NULL)
 liblangtag_built_public_headers =		\
+	lt-config.h				\
 	$(NULL)
 liblangtag_built_private_headers =		\
 	lt-localealias.h			\
