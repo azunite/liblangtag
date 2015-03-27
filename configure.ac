@@ -422,8 +422,6 @@ ____EOS
 
 	cat >> $outfile<<____EOS
 
-LT_END_DECLS
-
 #endif /* __LT_CONFIG_H__ */
 ____EOS
 
