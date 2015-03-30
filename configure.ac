@@ -205,6 +205,14 @@ AC_TYPE_SSIZE_T
 dnl ---alignment---
 AC_CHECK_ALIGNOF(void *)
 
+dnl ---check build env---
+if test -f $srcdir/data/common/bcp47/variant.xml; then
+	TEST_DATADIR="\\\"\$(abs_top_srcdir)/data/\\\""
+else
+	TEST_DATADIR="\\\"\$(abs_top_builddir)/data/\\\""
+fi
+AC_SUBST(TEST_DATADIR)
+
 dnl ======================================================================
 dnl functions testing
 dnl ======================================================================

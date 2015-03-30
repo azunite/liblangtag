@@ -5,7 +5,7 @@ SUBDIRS =
 AM_CPPFLAGS =								\
 	-I$(top_srcdir)/liblangtag					\
 	-I$(top_srcdir)							\
-	-DTEST_DATADIR="\"$(abs_top_builddir)/data\""			\
+	-DTEST_DATADIR=$(TEST_DATADIR)					\
 	-DTEST_MODDIR="\"$(abs_top_builddir)/extensions/.libs\""	\
 	-D__LANGTAG_COMPILATION						\
 	$(CHECK_CFLAGS)							\
