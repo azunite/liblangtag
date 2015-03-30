@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.62)
-AC_INIT([liblangtag], 0.5.5, [http://github.com/tagoh/liblangtag/issues])
+AC_INIT([liblangtag], 0.5.6, [http://github.com/tagoh/liblangtag/issues])
 
 . `dirname $0`/requires
 
