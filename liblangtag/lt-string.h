@@ -18,6 +18,7 @@
 #define __LT_STRING_H__
 
 #include <liblangtag/lt-macros.h>
+#include <sys/types.h>
 
 LT_BEGIN_DECLS
 
