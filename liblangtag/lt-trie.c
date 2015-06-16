@@ -37,6 +37,7 @@ struct _lt_trie_iter_t {
 	lt_iter_t    parent;
 	lt_list_t   *stack;
 	lt_string_t *pos_str;
+	char        *last_key;
 };
 
 /*< private >*/
@@ -167,6 +168,7 @@ _lt_trie_iter_init(lt_iter_tmpl_t *tmpl)
 	trie_iter = malloc(sizeof (lt_trie_iter_t));
 	if (trie_iter) {
 		trie_iter->pos_str = lt_string_new(NULL);
+		trie_iter->last_key = NULL;
 		trie_iter->stack = NULL;
 		if (trie->root) {
 			lt_trie_node_t *node = trie->root;
@@ -191,6 +193,7 @@ _lt_trie_iter_fini(lt_iter_t *iter)
 	if (trie_iter->stack)
 		lt_list_free(trie_iter->stack);
 	lt_string_unref(trie_iter->pos_str);
+	free(trie_iter->last_key);
 }
 
 static lt_bool_t
@@ -225,7 +228,9 @@ _lt_trie_iter_next(lt_iter_t    *iter,
 		trie_iter->stack = lt_list_first(base);
 		if (node->data) {
 			if (key) {
-				*key = strdup(lt_string_value(trie_iter->pos_str));
+				free(trie_iter->last_key);
+				trie_iter->last_key = strdup(lt_string_value(trie_iter->pos_str));
+				*key = trie_iter->last_key;
 			}
 			if (value)
 				*value = node->data;
