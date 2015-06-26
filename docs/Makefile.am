@@ -37,10 +37,6 @@ SCAN_OPTIONS=
 # e.g. MKDB_OPTIONS=--xml-mode --output-format=xml
 MKDB_OPTIONS=--xml-mode --output-format=xml
 
-# Extra options to supply to gtkdoc-mktmpl
-# e.g. MKTMPL_OPTIONS=--only-section-tmpl
-MKTMPL_OPTIONS=
-
 # Extra options to supply to gtkdoc-mkhtml
 MKHTML_OPTIONS=
 
@@ -125,7 +121,7 @@ EXTRA_DIST +=		\
 # Comment this out if you want 'make check' to test you doc status
 # and run some sanity checks
 if ENABLE_GTK_DOC
-TESTS_ENVIRONMENT = cd $(srcdir) && \
+TESTS_ENVIRONMENT = \
   DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
   SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
 #TESTS = $(GTKDOC_CHECK)
