@@ -1,3 +1,13 @@
+0.5.6 -> 0.5.7
+=================
+Akira TAGOH (3):
+      add missing sys/types.h in lt-string.h
+      missing docs
+      Update gtk-doc to be modernized
+
+David Tardon (1):
+      avoid accidental (and surprising) memory leaks
+
 0.5.5 -> 0.5.6
 =================
 Akira TAGOH (1):
