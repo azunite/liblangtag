@@ -221,10 +221,12 @@ AC_CHECK_HEADERS([dirent.h execinfo.h libgen.h sys/param.h])
 AC_CHECK_FUNCS([backtrace getegid geteuid getgid getuid __secure_getenv secure_getenv strndup vasprintf vsnprintf])
 AC_CHECK_VA_COPY
 
-if test "x$ac_cv_func_vsnprintf" = xyes; then
-	AC_CACHE_CHECK([Whether vsnprintf is C99-compliant], [lt_cv_c99_vsnprintf],
-		[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([Whether vsnprintf is C99-compliant], [lt_cv_c99_vsnprintf],
+	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <sys/types.h>
+#include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 int
 foo(char *format, ...)
 {
@@ -247,10 +249,9 @@ main(void)
 
 	return foo("foo: %s", "bar");
 }]])],
-		[lt_cv_c99_vsnprintf=yes],[lt_cv_c99_vsnprintf=no],[lt_cv_c99_vsnprintf=no])])
-	if test "x$lt_cv_c99_vsnprintf" = xyes; then
-		AC_DEFINE(LT_HAVE_C99_VSNPRINTF, 1, [Have C99-compliant vsnprintf])
-	fi
+	[lt_cv_c99_vsnprintf=yes],[lt_cv_c99_vsnprintf=no],[lt_cv_c99_vsnprintf=no])])
+if test "x$lt_cv_c99_vsnprintf" = xyes; then
+	AC_DEFINE(LT_HAVE_C99_VSNPRINTF, 1, [Have C99-compliant vsnprintf])
 fi
 
 dnl ======================================================================
