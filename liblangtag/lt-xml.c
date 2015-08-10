@@ -55,7 +55,7 @@ lt_xml_read_subtag_registry(lt_xml_t  *xml,
 	lt_return_val_if_fail (xml != NULL, FALSE);
 
 	regfile = lt_string_new(NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 	LT_STMT_START {
 		struct stat st;
 
@@ -68,7 +68,7 @@ lt_xml_read_subtag_registry(lt_xml_t  *xml,
 	lt_string_append_filename(regfile,
 				  lt_db_get_datadir(),
 				  "language-subtag-registry.xml", NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 		}
 	} LT_STMT_END;
 #endif
@@ -120,7 +120,7 @@ lt_xml_read_cldr_bcp47(lt_xml_t     *xml,
 	lt_return_val_if_fail (xml != NULL, FALSE);
 
 	regfile = lt_string_new(NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 	LT_STMT_START {
 		struct stat st;
 
@@ -138,7 +138,7 @@ lt_xml_read_cldr_bcp47(lt_xml_t     *xml,
 	lt_string_append_filename(regfile,
 				  lt_db_get_datadir(),
 				  "common", "bcp47", filename, NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 			}
 		}
 	} LT_STMT_END;
@@ -190,7 +190,7 @@ lt_xml_read_cldr_supplemental(lt_xml_t     *xml,
 	lt_return_val_if_fail (xml != NULL, FALSE);
 
 	regfile = lt_string_new(NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 	LT_STMT_START {
 		struct stat st;
 
@@ -209,7 +209,7 @@ lt_xml_read_cldr_supplemental(lt_xml_t     *xml,
 	lt_string_append_filename(regfile,
 				  lt_db_get_datadir(),
 				  "common", "supplemental", filename, NULL);
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 			}
 		}
 	} LT_STMT_END;

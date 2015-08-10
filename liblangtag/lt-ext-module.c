@@ -220,7 +220,7 @@ lt_ext_module_load(lt_ext_module_t *module)
 
 	if (!env) {
 		path_list = strdup(
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 			BUILDDIR LT_DIR_SEPARATOR_S "extensions" LT_SEARCHPATH_SEPARATOR_S
 			BUILDDIR LT_DIR_SEPARATOR_S "extensions" LT_DIR_SEPARATOR_S ".libs" LT_SEARCHPATH_SEPARATOR_S
 #endif
@@ -576,7 +576,7 @@ lt_ext_modules_load(void)
 		return;
 	if (!env) {
 		path_list = strdup(
-#ifdef GNOME_ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
 			BUILDDIR LT_DIR_SEPARATOR_S "extensions" LT_SEARCHPATH_SEPARATOR_S
 			BUILDDIR LT_DIR_SEPARATOR_S "extensions" LT_DIR_SEPARATOR_S ".libs" LT_SEARCHPATH_SEPARATOR_S
 #endif
