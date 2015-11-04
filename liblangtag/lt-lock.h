@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-lock.h
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -12,6 +12,10 @@
  */
 #ifndef __LT_LOCK_H__
 #define __LT_LOCK_H__
+
+#if !defined (__LANGTAG_PRIVATE)
+#error "Unable to use the private header publicly"
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

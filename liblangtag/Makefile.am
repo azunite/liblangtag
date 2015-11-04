@@ -8,6 +8,7 @@ AM_CPPFLAGS =							\
 	-I$(top_builddir)/liblangtag/				\
 	-I$(top_builddir)					\
 	-D__LANGTAG_COMPILATION					\
+	-D__LANGTAG_PRIVATE					\
 	-DBUILDDIR="\"$(abs_top_builddir)\""			\
 	-DSRCDIR="\"$(abs_top_srcdir)\""			\
 	-DREGDATADIR="\"$(datadir)/liblangtag\""		\
@@ -64,6 +65,7 @@ liblangtag_public_headers =			\
 	lt-lang-db.h				\
 	lt-list.h				\
 	lt-macros.h				\
+	lt-messages.h				\
 	lt-redundant.h				\
 	lt-redundant-db.h			\
 	lt-region.h				\
@@ -72,8 +74,10 @@ liblangtag_public_headers =			\
 	lt-script-db.h				\
 	lt-string.h				\
 	lt-tag.h				\
+	lt-utils.h				\
 	lt-variant.h				\
 	lt-variant-db.h				\
+	lt-xml.h				\
 	$(NULL)
 liblangtag_private_headers =			\
 	lt-atomic.h				\
@@ -85,16 +89,13 @@ liblangtag_private_headers =			\
 	lt-lang-private.h			\
 	lt-lock.h				\
 	lt-mem.h				\
-	lt-messages.h				\
 	lt-redundant-private.h			\
 	lt-region-private.h			\
 	lt-script-private.h			\
 	lt-stdint.h				\
 	lt-tag-private.h			\
 	lt-trie.h				\
-	lt-utils.h				\
 	lt-variant-private.h			\
-	lt-xml.h				\
 	$(NULL)
 liblangtag_built_public_headers =		\
 	lt-config.h				\

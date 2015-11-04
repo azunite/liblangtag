@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-utils.h
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -14,12 +14,6 @@
 #define __LT_UTILS_H__
 
 #include <stdarg.h>
-#if HAVE_MEMORY_H
-#include <memory.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#endif
 #include "lt-macros.h"
 
 LT_BEGIN_DECLS

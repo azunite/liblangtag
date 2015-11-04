@@ -112,6 +112,7 @@ reg2xml_SOURCES =	\
 	$(NULL)
 reg2xml_CFLAGS =			\
 	$(LIBXML2_CFLAGS)		\
+	-I$(top_srcdir)			\
 	-I$(top_srcdir)/liblangtag	\
 	-D__LANGTAG_COMPILATION		\
 	$(NULL)

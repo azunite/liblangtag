@@ -16,10 +16,8 @@
 #ifndef __LT_MESSAGES_H__
 #define __LT_MESSAGES_H__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include <stdarg.h>
+#include "lt-config.h"
 #include "lt-macros.h"
 
 LT_BEGIN_DECLS
