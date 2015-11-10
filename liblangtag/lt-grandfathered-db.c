@@ -99,7 +99,8 @@ lt_grandfathered_db_parse(lt_grandfathered_db_t  *grandfathereddb,
 				}
 			} else if (xmlStrcmp(cnode->name, (const xmlChar *)"added") == 0 ||
 				   xmlStrcmp(cnode->name, (const xmlChar *)"text") == 0 ||
-				   xmlStrcmp(cnode->name, (const xmlChar *)"deprecated") == 0) {
+				   xmlStrcmp(cnode->name, (const xmlChar *)"deprecated") == 0 ||
+				   xmlStrcmp(cnode->name, (const xmlChar *)"comments") == 0) {
 				/* ignore it */
 			} else if (xmlStrcmp(cnode->name, (const xmlChar *)"description") == 0) {
 				/* wonder if many descriptions helps something. or is it a bug? */

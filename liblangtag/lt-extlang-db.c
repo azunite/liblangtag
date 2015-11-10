@@ -98,7 +98,8 @@ lt_extlang_db_parse(lt_extlang_db_t  *extlangdb,
 					subtag = xmlNodeGetContent(cnode);
 				}
 			} else if (xmlStrcmp(cnode->name, (const xmlChar *)"added") == 0 ||
-				   xmlStrcmp(cnode->name, (const xmlChar *)"text") == 0) {
+				   xmlStrcmp(cnode->name, (const xmlChar *)"text") == 0 ||
+				   xmlStrcmp(cnode->name, (const xmlChar *)"deprecated") == 0) {
 				/* ignore it */
 			} else if (xmlStrcmp(cnode->name, (const xmlChar *)"description") == 0) {
 				/* wonder if many descriptions helps something. or is it a bug? */
