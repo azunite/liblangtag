@@ -1,3 +1,13 @@
+0.5.7 -> 0.5.8
+=================
+Akira TAGOH (6):
+      Fix the build fail on MSVC 14 (fixes issue#13)
+      Drop the word of GNOME from the ifdef'd variable for debugging
+      Fix the build requirement in pkgconfig file
+      Make some header files public (fixes: issue#14)
+      Fix test fail on SunOS
+      Fix unknown node issue
+
 0.5.6 -> 0.5.7
 =================
 Akira TAGOH (3):
