@@ -83,17 +83,26 @@ lt_db_get_datadir(void)
  * lt_db_initialize:
  *
  * Initialize all of the language tags database instance.
+ * If the databases are already initialized, it won't do
+ * nothing.
  */
 void
 lt_db_initialize(void)
 {
-	lt_db_get_lang();
-	lt_db_get_extlang();
-	lt_db_get_script();
-	lt_db_get_region();
-	lt_db_get_variant();
-	lt_db_get_grandfathered();
-	lt_db_get_redundant();
+	if (!__db_lang)
+		    lt_db_get_lang();
+	if (!__db_extlang)
+		lt_db_get_extlang();
+	if (!__db_script)
+		lt_db_get_script();
+	if (!__db_region)
+		lt_db_get_region();
+	if (!__db_variant)
+		lt_db_get_variant();
+	if (!__db_grandfathered)
+		lt_db_get_grandfathered();
+	if (!__db_redundant)
+		lt_db_get_redundant();
 	lt_ext_modules_load();
 }
 
