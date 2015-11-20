@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * check-tag.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -319,6 +319,10 @@ TDEF (lt_tag_convert_from_locale_string) {
 	fail_unless(lt_strcasecmp(lt_tag_get_string(t1), "sr-Cyrl-RS") == 0, "wrongly converted to the tag");
 	lt_tag_unref(t1);
 
+	t1 = lt_tag_convert_from_locale_string("sr_Cyrl_RS.UTF-8", NULL);
+	fail_unless(t1 != NULL, "shold be dealt as valid locale");
+	fail_unless(lt_strcasecmp(lt_tag_get_string(t1), "sr-Cyrl-RS") == 0, "wrongly converted to the tag");
+	lt_tag_unref(t1);
 } TEND
 
 /************************************************************/

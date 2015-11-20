@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-tag.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -1122,7 +1122,7 @@ static lt_tag_t *
 _lt_tag_convert_from_locale_string(const char  *locale,
 				   lt_error_t **error)
 {
-	char *s, *territory, *codeset, *modifier;
+	char *s, *territory, *codeset, *modifier, *script = NULL, *p;
 	lt_tag_t *tag;
 	lt_error_t *err = NULL;
 
@@ -1135,7 +1135,7 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 			goto bail;
 	} else {
 		lt_string_t *tag_string;
-		const char *script = NULL, *variant = NULL, *privateuse = NULL;
+		const char *sscript = NULL, *variant = NULL, *privateuse = NULL;
 		char *transform;
 
 		modifier = strchr(s, '@');
@@ -1148,10 +1148,19 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 			*codeset = 0;
 			codeset++;
 		}
-		territory = strchr(s, '_');
+		p = strchr(s, '_');
+		if (p) {
+			*p = 0;
+			p++;
+		}
+		/* For platforms where represent locale as BCP47 */
+		territory = strchr(p, '_');
 		if (territory) {
 			*territory = 0;
 			territory++;
+			script = p;
+		} else {
+			territory = p;
 		}
 		if (codeset &&
 		    (lt_strcasecmp(codeset, "utf-8") == 0 ||
@@ -1161,6 +1170,7 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 		/* check if the language is a locale alias */
 		if (strlen(s) > 3 &&
 		    !territory &&
+		    !script &&
 		    !codeset &&
 		    !modifier) {
 			const char *loc = lt_tag_get_locale_from_locale_alias(s);
@@ -1172,12 +1182,14 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 				goto bail;
 			}
 		}
-		if (!_lt_tag_convert_script_from_locale_modifier(modifier, &script))
+		if (!_lt_tag_convert_script_from_locale_modifier(modifier, &sscript))
 			if (!_lt_tag_convert_variant_from_locale_modifier(modifier, &variant))
 				privateuse = _lt_tag_convert_privaseuse_from_locale_modifier(modifier);
 
 		tag_string = lt_string_new(s);
-		if (script)
+		if (sscript)
+			lt_string_append_printf(tag_string, "-%s", sscript);
+		else if (script)
 			lt_string_append_printf(tag_string, "-%s", script);
 		if (territory)
 			lt_string_append_printf(tag_string, "-%s", territory);

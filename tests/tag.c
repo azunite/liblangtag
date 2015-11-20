@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * tag.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -34,7 +34,7 @@ main(int    argc,
 	if (lt_strcmp0(argv[1], "help") == 0) {
 	  help:
 		printf("Usage: %s <command> ...\n"
-		       "commands: canonicalize, ecanonicalize, dump, from_locale, lookup, match, to_locale, transform\n",
+		       "commands: canonicalize, ecanonicalize, dump, from_locale, from_locale_s, lookup, match, to_locale, transform\n",
 		       argv[0]);
 	} else if (lt_strcmp0(argv[1], "canonicalize") == 0) {
 		char *s;
@@ -55,6 +55,15 @@ main(int    argc,
 	} else if (lt_strcmp0(argv[1], "dump") == 0) {
 		if (lt_tag_parse(tag, argv[2], NULL))
 			lt_tag_dump(tag);
+	} else if (lt_strcmp0(argv[1], "from_locale_s") == 0) {
+		lt_tag_unref(tag);
+		tag = lt_tag_convert_from_locale_string(argv[2], NULL);
+		if (tag) {
+			const char *s = lt_tag_get_string(tag);
+
+			printf("Tag: %s\n", s);
+			lt_tag_dump(tag);
+		}
 	} else if (lt_strcmp0(argv[1], "from_locale") == 0) {
 		lt_tag_unref(tag);
 		tag = lt_tag_convert_from_locale(NULL);
