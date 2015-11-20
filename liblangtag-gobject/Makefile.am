@@ -11,6 +11,9 @@ AM_CPPFLAGS =					\
 	-D__LANGTAG_COMPILATION			\
 	$(GOBJECT_CFLAGS)			\
 	$(NULL)
+if ENABLE_DEBUG
+CFLAGS += -Wno-error=cpp -Wcpp
+endif
 DEPS =							\
 	$(top_builddir)/liblangtag/liblangtag.la	\
 	$(NULL)
