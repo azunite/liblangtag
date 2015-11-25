@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-macros.h
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -184,6 +184,51 @@
 #else
 #  define LT_LIKELY(_e_)	(_e_)
 #  define LT_UNLIKELY(_e_)	(_e_)
+#endif
+
+/**
+ * LT_GNUC_DEPRECATED:
+ *
+ * Expands to the GNU C deprecated attribute if the compiler is gcc.
+ * It can be used to mark typedefs, variables and functions as deprecated.
+ * When called with the `-Wdeprecated-declarations` option.
+ * gcc will generate warnings when deprecated interfaces are used.
+ *
+ * Place the attribute after the declaration, just before the semicolon.
+ *
+ * See the GNU C documentation for more details.
+ */
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#define LT_GNUC_DEPRECATED __attribute__((__deprecated__))
+#else
+#define LT_GNUC_DEPRECATED
+#endif
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
+#define LT_GNUC_DEPRECATED_FOR(f) __attribute__((deprecated("Use " #f " instead")))
+#else
+#define LT_GNUC_DEPRECATED_FOR(f) LT_GNUC_DEPRECATED
+#endif
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#define LT_GNUC_BEGIN_IGNORE_DEPRECATIONS	\
+	_Pragma ("GCC diagnostic push")		\
+	_Pragma ("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define LT_GNUC_END_IGNORE_DEPRECATIONS		\
+	_Pragma ("GCC diagnostic pop")
+#elif defined (_MSC_VER) && (_MSC_VER >= 1500)
+#define LT_GNUC_BEGIN_IGNORE_DEPRECATIONS	\
+	__pragma (warning (push))		\
+	__pragma (warning (disable : 4996))
+#define LT_GNUC_END_IGNORE_DEPRECATIONS		\
+	__pragma (warning (pop))
+#elif defined (__clang__)
+#define LT_GNUC_BEGIN_IGNORE_DEPRECATIONS	\
+	_Pragma("clang diagnostic push")	\
+	_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define LT_GNUC_END_IGNORE_DEPRECATIONS		\
+	_Pragma("clang diagnostic pop")
+#else
+#define LT_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#define LT_GNUC_END_IGNORE_DEPRECATIONS
 #endif
 
 /* boolean */
