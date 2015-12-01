@@ -2103,6 +2103,10 @@ lt_tag_transform(lt_tag_t    *tag,
 	char *retval = NULL, *s;
 	lt_error_t *err = NULL;
 	lt_tag_t *canoned_tag = NULL;
+	lt_list_t *lv = NULL;
+	const lt_list_t *l;
+	lt_extension_t *ext = NULL;
+	lt_string_t *priv = NULL;
 
 	lt_return_val_if_fail (tag != NULL, NULL);
 
@@ -2127,6 +2131,14 @@ lt_tag_transform(lt_tag_t    *tag,
 	} else {
 		goto bail1;
 	}
+	l = lt_tag_get_variants(canoned_tag);
+	for ( ; l; l = lt_list_next(l)) {
+		lv = lt_list_append(lv, lt_variant_ref(lt_list_value(l)), (lt_destroy_func_t)lt_variant_unref);
+	}
+	ext = (lt_extension_t *)lt_tag_get_extension(canoned_tag);
+	if (ext)
+		lt_extension_ref(ext);
+	priv = lt_string_new(lt_string_value(canoned_tag->privateuse));
 	/* clean up for lookup */
 	lt_tag_free_variants(canoned_tag);
 	lt_tag_free_extension(canoned_tag);
@@ -2143,6 +2155,11 @@ lt_tag_transform(lt_tag_t    *tag,
 		xmlNodePtr ent;
 		int retry;
 		lt_tag_t *wt;
+		lt_lang_t *und;
+		lt_lang_db_t *langdb = lt_db_get_lang();
+
+		und = lt_lang_db_lookup(langdb, "und");
+		lt_lang_db_unref(langdb);
 
 		xml = lt_xml_new();
 		doc = lt_xml_get_cldr(xml, LT_XML_CLDR_SUPPLEMENTAL_LIKELY_SUBTAGS);
@@ -2153,7 +2170,7 @@ lt_tag_transform(lt_tag_t    *tag,
 			goto bail2;
 		}
 
-		for (retry = 4; retry > 0; retry--) {
+		for (retry = 5; retry > 0; retry--) {
 			xmlChar *to;
 			char *xpath_string = NULL;
 			int n;
@@ -2164,14 +2181,19 @@ lt_tag_transform(lt_tag_t    *tag,
 			wt = lt_tag_copy(canoned_tag);
 			switch (retry) {
 			    case 1:
-				    lt_tag_free_script(wt);
+				    lt_tag_free_language(wt);
 				    lt_tag_free_region(wt);
+				    lt_tag_set_language(wt, lt_lang_ref(und));
 				    break;
 			    case 2:
 				    lt_tag_free_script(wt);
+				    lt_tag_free_region(wt);
 				    break;
 			    case 3:
 				    lt_tag_free_region(wt);
+				    break;
+			    case 4:
+				    lt_tag_free_script(wt);
 				    break;
 			    default:
 				    break;
@@ -2225,15 +2247,22 @@ lt_tag_transform(lt_tag_t    *tag,
 
 					switch (retry) {
 					    case 1:
+						    r = (lt_region_t *)lt_tag_get_region(canoned_tag);
+						    if (r)
+							    lt_tag_set_region(wt, lt_region_ref(r));
+						    goto copies_variants;
 					    case 2:
+					    case 4:
 						    sc = (lt_script_t *)lt_tag_get_script(canoned_tag);
-						    lt_tag_set_script(wt, lt_script_ref(sc));
-						    if (retry == 2)
+						    if (sc)
+							    lt_tag_set_script(wt, lt_script_ref(sc));
+						    if (retry == 4)
 							    goto copies_variants;
 					    case 3:
 						    r = (lt_region_t *)lt_tag_get_region(canoned_tag);
-						    lt_tag_set_region(wt, lt_region_ref(r));
-					    case 4:
+						    if (r)
+							    lt_tag_set_region(wt, lt_region_ref(r));
+					    case 5:
 					    copies_variants:
 						    l = lt_tag_get_variants(canoned_tag);
 						    for (ll = l; ll != NULL; ll = lt_list_next(ll)) {
@@ -2243,6 +2272,13 @@ lt_tag_transform(lt_tag_t    *tag,
 						    }
 						    break;
 					}
+					for (l = lv; l; l = lt_list_next(l)) {
+						lt_tag_set_variant(wt, lt_variant_ref(lt_list_value(l)));
+					}
+					if (ext)
+						lt_tag_set_extension(wt, lt_extension_ref(ext));
+					if (priv)
+						lt_string_append(wt->privateuse, lt_string_value(priv));
 					lt_tag_free_tag_string(wt);
 					retval = strdup(lt_tag_get_string(wt));
 				} else {
@@ -2260,6 +2296,12 @@ lt_tag_transform(lt_tag_t    *tag,
 		lt_xml_unref(xml);
 	} LT_STMT_END;
   bail1:
+	if (priv)
+		lt_string_unref(priv);
+	if (ext)
+		lt_extension_unref(ext);
+	if (lv)
+		lt_list_free(lv);
 	if (canoned_tag)
 		lt_tag_unref(canoned_tag);
 
@@ -2268,6 +2310,8 @@ lt_tag_transform(lt_tag_t    *tag,
 			*error = lt_error_ref(err);
 		else
 			lt_error_print(err, LT_ERR_ANY);
+		lt_error_unref(err);
+	} else if (err) {
 		lt_error_unref(err);
 	}
 
