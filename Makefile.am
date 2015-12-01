@@ -25,6 +25,7 @@ MAINTAINERCLEANFILES =			\
 	$(srcdir)/INSTALL		\
 	$(srcdir)/aclocal.m4		\
 	$(srcdir)/ar-lib		\
+	$(srcdir)/compile		\
 	$(srcdir)/config.guess		\
 	$(srcdir)/config.h.in		\
 	$(srcdir)/config.sub		\
@@ -37,6 +38,7 @@ MAINTAINERCLEANFILES =			\
 	$(srcdir)/m4macros/gtk-doc.m4	\
 	$(srcdir)/m4macros/libtool.m4	\
 	$(srcdir)/m4macros/lt*.m4	\
+	$(srcdir)/test-driver		\
 	`find "$(srcdir)" -type f -name Makefile.in -print`	\
 	$(NULL)
 DISTCLEANFILES =			\
