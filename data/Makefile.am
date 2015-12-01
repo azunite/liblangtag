@@ -42,8 +42,9 @@ bcp47_xml_files =				\
 	common/bcp47/transform_private_use.xml	\
 	common/bcp47/variant.xml		\
 	$(NULL)
-supplemental_xml_files =		\
-	common/supplemental/likelySubtags.xml	\
+supplemental_xml_files =				\
+	common/supplemental/likelySubtags.xml		\
+	common/supplemental/supplementalData.xml	\
 	$(NULL)
 stamp_files =		\
 	stamp-core-zip	\

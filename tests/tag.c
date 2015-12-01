@@ -34,7 +34,7 @@ main(int    argc,
 	if (lt_strcmp0(argv[1], "help") == 0) {
 	  help:
 		printf("Usage: %s <command> ...\n"
-		       "commands: canonicalize, ecanonicalize, dump, from_locale, from_locale_s, lookup, match, to_locale, transform\n",
+		       "commands: canonicalize, ecanonicalize, dump, from_locale, from_locale_s, lookup, match, script, to_locale, transform\n",
 		       argv[0]);
 	} else if (lt_strcmp0(argv[1], "canonicalize") == 0) {
 		char *s;
@@ -104,6 +104,20 @@ main(int    argc,
 			r = lt_tag_transform(tag, NULL);
 			printf("%s -> %s\n", argv[2], r);
 			free(r);
+		}
+	} else if (lt_strcmp0(argv[1], "script") == 0) {
+		if (lt_tag_parse(tag, argv[2], NULL)) {
+			lt_relation_db_t *db = lt_db_get_relation();
+			const lt_lang_t *lang = lt_tag_get_language(tag);
+			lt_list_t *l, *ll = lt_relation_db_lookup_script_from_lang(db, lang);
+
+			printf("%s: ", lt_lang_get_tag(lang));
+			for (l = ll; l; l = lt_list_next(l)) {
+				lt_script_t *script = lt_list_value(l);
+
+				printf("%s ", lt_script_get_tag(script));
+			}
+			printf("\n");
 		}
 	} else {
 		goto help;

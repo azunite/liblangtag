@@ -82,6 +82,7 @@ liblangtag_gobject_built_private_headers =	\
 	lt-redundant.gir.h			\
 	lt-region-db.gir.h			\
 	lt-region.gir.h				\
+	lt-relation-db.gir.h			\
 	lt-script-db.gir.h			\
 	lt-script.gir.h				\
 	lt-string.gir.h				\
@@ -107,6 +108,7 @@ liblangtag_gobject_built_sources =	\
 	lt-redundant.gir.c		\
 	lt-region-db.gir.c		\
 	lt-region.gir.c			\
+	lt-relation-db.gir.c		\
 	lt-script-db.gir.c		\
 	lt-script.gir.c			\
 	lt-string.gir.c			\

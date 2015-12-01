@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-database.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -36,6 +36,7 @@ static lt_region_db_t        *__db_region = NULL;
 static lt_variant_db_t       *__db_variant = NULL;
 static lt_grandfathered_db_t *__db_grandfathered = NULL;
 static lt_redundant_db_t     *__db_redundant = NULL;
+static lt_relation_db_t      *__db_relation = NULL;
 
 static char __lt_db_datadir[LT_PATH_MAX] = { 0 };
 
@@ -103,6 +104,8 @@ lt_db_initialize(void)
 		lt_db_get_grandfathered();
 	if (!__db_redundant)
 		lt_db_get_redundant();
+	if (!__db_relation)
+		lt_db_get_relation();
 	lt_ext_modules_load();
 }
 
@@ -122,6 +125,7 @@ lt_db_finalize(void)
 	lt_variant_db_unref(__db_variant);
 	lt_grandfathered_db_unref(__db_grandfathered);
 	lt_redundant_db_unref(__db_redundant);
+	lt_relation_db_unref(__db_relation);
 	lt_ext_modules_unload();
 }
 
@@ -210,3 +214,13 @@ DEFUNC_GET_INSTANCE(script)
  * Returns: The instance of #lt_variant_db_t.
  */
 DEFUNC_GET_INSTANCE(variant)
+/**
+ * lt_db_get_relation:
+ *
+ * Obtains the instance of #lt_relation_db_t. This still allows to use without
+ * lt_db_initialize(). but it will takes some time to load the database on
+ * the memory every time.
+ *
+ * Returns: The instance of #lt_relation_db_t.
+ */
+DEFUNC_GET_INSTANCE(relation)

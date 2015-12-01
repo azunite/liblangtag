@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-xml.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -14,6 +14,7 @@
 #include "config.h"
 #endif
 
+#include <stddef.h>
 #include <sys/stat.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -37,6 +38,7 @@ struct _lt_xml_t {
 	xmlDocPtr cldr_bcp47_transform;
 	xmlDocPtr cldr_bcp47_variant;
 	xmlDocPtr cldr_supplemental_likelysubtags;
+	xmlDocPtr cldr_supplemental_supplementaldata;
 };
 
 static lt_xml_t *__xml = NULL;
@@ -393,6 +395,10 @@ lt_xml_new(void)
 						   &__xml->cldr_supplemental_likelysubtags,
 						   &err))
 			goto bail;
+		if (!lt_xml_read_cldr_supplemental(__xml, "supplementalData.xml",
+						   &__xml->cldr_supplemental_supplementaldata,
+						   &err))
+			goto bail;
 	}
 
   bail:
@@ -434,28 +440,19 @@ xmlDocPtr
 lt_xml_get_cldr(lt_xml_t      *xml,
 		lt_xml_cldr_t  type)
 {
+	xmlDocPtr *pref;
+	int idx;
+
+	LT_ASSERT_STATIC ((sizeof (lt_xml_t) - offsetof (lt_xml_t, cldr_bcp47_calendar)) == (sizeof (lt_pointer_t) * ((LT_XML_CLDR_BCP47_END - LT_XML_CLDR_BCP47_BEGIN + 1) + (LT_XML_CLDR_SUPPLEMENTAL_END - LT_XML_CLDR_SUPPLEMENTAL_BEGIN + 1))));
+
 	lt_return_val_if_fail (xml != NULL, NULL);
+	lt_return_val_if_fail (type > LT_XML_CLDR_BEGIN && type < LT_XML_CLDR_END, NULL);
 
-	switch (type) {
-	    case LT_XML_CLDR_BCP47_CALENDAR:
-		    return xml->cldr_bcp47_calendar;
-	    case LT_XML_CLDR_BCP47_COLLATION:
-		    return xml->cldr_bcp47_collation;
-	    case LT_XML_CLDR_BCP47_CURRENCY:
-		    return xml->cldr_bcp47_currency;
-	    case LT_XML_CLDR_BCP47_NUMBER:
-		    return xml->cldr_bcp47_number;
-	    case LT_XML_CLDR_BCP47_TIMEZONE:
-		    return xml->cldr_bcp47_timezone;
-	    case LT_XML_CLDR_BCP47_TRANSFORM:
-		    return xml->cldr_bcp47_transform;
-	    case LT_XML_CLDR_BCP47_VARIANT:
-		    return xml->cldr_bcp47_variant;
-	    case LT_XML_CLDR_SUPPLEMENTAL_LIKELY_SUBTAGS:
-		    return xml->cldr_supplemental_likelysubtags;
-	    default:
-		    break;
-	}
+	pref = &xml->cldr_bcp47_calendar;
+	if (type >= LT_XML_CLDR_DUMMY1)
+		idx = type - LT_XML_CLDR_DUMMY1 + LT_XML_CLDR_BCP47_END;
+	else
+		idx = type;
 
-	return NULL;
+	return pref[idx - 1];
 }

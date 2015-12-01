@@ -70,6 +70,7 @@ liblangtag_public_headers =			\
 	lt-redundant-db.h			\
 	lt-region.h				\
 	lt-region-db.h				\
+	lt-relation-db.h			\
 	lt-script.h				\
 	lt-script-db.h				\
 	lt-string.h				\
@@ -127,6 +128,7 @@ liblangtag_sources =				\
 	lt-redundant-db.c			\
 	lt-region.c				\
 	lt-region-db.c				\
+	lt-relation-db.c			\
 	lt-script.c				\
 	lt-script-db.c				\
 	lt-string.c				\

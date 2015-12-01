@@ -120,11 +120,32 @@
  * It allows the compiler to type-check the arguments passed to the function.
  * See the GNU C documentation for details.
  */
+/**
+ * LT_GNUC_UNUSED:
+ *
+ * Expands to the GNU C unused function attribute if the compiler is gcc.
+ * It is used for declaring functions and arguments which may never be used.
+ * It avoids possible compiler warnings.
+ *
+ * For functions, place the attribute after the declaration, just before the
+ * semicolon. For arguments, place the attribute at the beginning of the
+ * argument declaration.
+ *
+ * |[<!-- language="C" -->
+ * void my_unused_function (LT_GNUC_UNUSED int unused_argument,
+ *                          int other argument) LT_GNUC_UNUSED;
+ * ]|
+ *
+ * See the GNU C documentation for more details.
+ */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
 #  define LT_GNUC_PRINTF(format_idx, arg_idx)	\
 	__attribute__((__format__ (__printf__, format_idx, arg_idx)))
+#  define LT_GNUC_UNUSED			\
+	__attribute__((__unused__))
 #else /* !__GNUC__ */
 #  define LT_GNUC_PRINTF(format_idx, arg_idx)
+#  define LT_GNUC_UNUSED
 #endif
 /**
  * LT_GNUC_NULL_TERMINATED:
@@ -303,6 +324,11 @@
 #  define LT_BREAKPOINT()				\
 	LT_STMT_START {raise(SIGTRAP);} LT_STMT_END
 #endif
+
+/* assertion */
+#define _LT_ASSERT_STATIC1(_l_,_x_)	typedef int _static_assert_on_line_##_l_##_failed[(_x_)?1:-1] LT_GNUC_UNUSED
+#define _LT_ASSERT_STATIC0(_l_,_x_)	_LT_ASSERT_STATIC1 (_l_, (_x_))
+#define LT_ASSERT_STATIC(_x_)		_LT_ASSERT_STATIC0 (__LINE__, (_x_))
 
 LT_BEGIN_DECLS
 

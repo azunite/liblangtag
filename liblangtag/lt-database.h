@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-database.h
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2015 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -25,6 +25,7 @@
 #include <liblangtag/lt-region-db.h>
 #include <liblangtag/lt-script-db.h>
 #include <liblangtag/lt-variant-db.h>
+#include <liblangtag/lt-relation-db.h>
 
 LT_BEGIN_DECLS
 
@@ -39,6 +40,7 @@ lt_region_db_t        *lt_db_get_region       (void);
 lt_variant_db_t       *lt_db_get_variant      (void);
 lt_grandfathered_db_t *lt_db_get_grandfathered(void);
 lt_redundant_db_t     *lt_db_get_redundant    (void);
+lt_relation_db_t      *lt_db_get_relation     (void);
 
 LT_END_DECLS
 
