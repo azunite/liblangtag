@@ -1129,8 +1129,8 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 	s = strdup(locale);
 	tag = lt_tag_new();
 	if (!s || s[0] == 0 ||
-	    lt_strcmp0(s, "C") == 0 ||
-	    lt_strcmp0(s, "POSIX") == 0) {
+	    lt_strcasecmp(s, "C") == 0 ||
+	    lt_strcasecmp(s, "POSIX") == 0) {
 		if (!lt_tag_parse(tag, "en-US-u-va-posix", &err))
 			goto bail;
 	} else {
@@ -1152,13 +1152,16 @@ _lt_tag_convert_from_locale_string(const char  *locale,
 		if (p) {
 			*p = 0;
 			p++;
-		}
-		/* For platforms where represent locale as BCP47 */
-		territory = strchr(p, '_');
-		if (territory) {
-			*territory = 0;
-			territory++;
-			script = p;
+
+			/* For platforms where represent locale as BCP47 */
+			territory = strchr(p, '_');
+			if (territory) {
+				*territory = 0;
+				territory++;
+				script = p;
+			} else {
+				territory = p;
+			}
 		} else {
 			territory = p;
 		}
