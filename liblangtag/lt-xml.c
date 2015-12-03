@@ -39,6 +39,7 @@ struct _lt_xml_t {
 	xmlDocPtr cldr_bcp47_variant;
 	xmlDocPtr cldr_supplemental_likelysubtags;
 	xmlDocPtr cldr_supplemental_supplementaldata;
+	xmlDocPtr cldr_supplemental_supplementalmetadata;
 };
 
 static lt_xml_t *__xml = NULL;
@@ -397,6 +398,10 @@ lt_xml_new(void)
 			goto bail;
 		if (!lt_xml_read_cldr_supplemental(__xml, "supplementalData.xml",
 						   &__xml->cldr_supplemental_supplementaldata,
+						   &err))
+			goto bail;
+		if (!lt_xml_read_cldr_supplemental(__xml, "supplementalMetadata.xml",
+						   &__xml->cldr_supplemental_supplementalmetadata,
 						   &err))
 			goto bail;
 	}

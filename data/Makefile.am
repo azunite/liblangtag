@@ -45,6 +45,7 @@ bcp47_xml_files =				\
 supplemental_xml_files =				\
 	common/supplemental/likelySubtags.xml		\
 	common/supplemental/supplementalData.xml	\
+	common/supplemental/supplementalMetadata.xml	\
 	$(NULL)
 stamp_files =		\
 	stamp-core-zip	\

@@ -37,6 +37,26 @@ LT_BEGIN_DECLS
  */
 typedef struct _lt_tag_t	lt_tag_t;
 
+/**
+ * lt_tag_filter_t:
+ *
+ * This is used as a binary count sequence with lt_tag_get_string_with_filter()
+ * to allow only given tags to be the outcome.
+ */
+typedef enum _lt_tag_filter_t	lt_tag_filter_t;
+
+enum _lt_tag_filter_t {
+	LT_TAG_FILTER_NONE          = 0,
+	LT_TAG_FILTER_LANGUAGE      = 1 << 0,
+	LT_TAG_FILTER_EXTLANG       = 1 << 1,
+	LT_TAG_FILTER_SCRIPT        = 1 << 2,
+	LT_TAG_FILTER_REGION        = 1 << 3,
+	LT_TAG_FILTER_VARIANT       = 1 << 4,
+	LT_TAG_FILTER_EXTENSION     = 1 << 5,
+	LT_TAG_FILTER_PRIVATEUSE    = 1 << 6,
+	LT_TAG_FILTER_GRANDFATHERED = 1 << 7,
+	LT_TAG_FILTER_ALL           = -1
+};
 
 lt_tag_t                 *lt_tag_new                         (void);
 lt_tag_t                 *lt_tag_ref                         (lt_tag_t       *tag);
@@ -51,6 +71,8 @@ void                      lt_tag_clear                       (lt_tag_t       *ta
 lt_tag_t                 *lt_tag_copy                        (const lt_tag_t *tag);
 lt_bool_t                 lt_tag_truncate                    (lt_tag_t       *tag,
                                                               lt_error_t     **error);
+const char               *lt_tag_get_string_with_filter      (lt_tag_t       *tag,
+							      int             filter);
 const char               *lt_tag_get_string                  (lt_tag_t       *tag);
 char                     *lt_tag_canonicalize                (lt_tag_t       *tag,
                                                               lt_error_t     **error);

@@ -184,6 +184,21 @@ TDEF (lt_tag_canonicalize) {
 	fail_unless(s != NULL, "Unable to be canonicalize.");
 	fail_unless(lt_strcmp0(s, "bzs") == 0, "Unexpected result to be canonicalized.");
 	free(s);
+	fail_unless(lt_tag_parse(t1, "sh-Arab-AQ", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize(t1, NULL);
+	fail_unless(s != NULL, "Unable to canonicalize.");
+	fail_unless(lt_strcmp0(s, "sr-Arab-AQ") == 0, "Unexpected result to be canonicalized.");
+	free(s);
+	fail_unless(lt_tag_parse(t1, "sh", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "sr-Latn") == 0, "Unexpected result to be canonicalized.");
+	free(s);
+	fail_unless(lt_tag_parse(t1, "mo", NULL), "should be valid langtag.");
+	s = lt_tag_canonicalize(t1, NULL);
+	fail_unless(s != NULL, "Unable to be canonicalize.");
+	fail_unless(lt_strcmp0(s, "ro-MD") == 0, "Unexpected result to be canonicalized.");
+	free(s);
 
 	lt_tag_unref(t1);
 } TEND
