@@ -118,6 +118,8 @@ main(int    argc,
 				printf("%s ", lt_script_get_tag(script));
 			}
 			printf("\n");
+			lt_list_free(ll);
+			lt_relation_db_unref(db);
 		}
 	} else {
 		goto help;

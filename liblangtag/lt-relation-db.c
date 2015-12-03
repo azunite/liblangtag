@@ -52,8 +52,8 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 	xmlXPathObjectPtr xobj = NULL;
 	lt_error_t *err = NULL;
 	int i, n;
-	lt_lang_db_t *langdb;
-	lt_script_db_t *scriptdb;
+	lt_lang_db_t *langdb = NULL;
+	lt_script_db_t *scriptdb = NULL;
 
 	lt_return_val_if_fail (relationdb != NULL, FALSE);
 
@@ -111,7 +111,7 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 					   (const char *)type);
 			if (!l)
 				alloced = TRUE;
-			l = lt_list_append(l, lt_script_ref(os), (lt_destroy_func_t)lt_script_unref);
+			l = lt_list_append(l, os, (lt_destroy_func_t)lt_script_unref);
 			if (alloced) {
 				lt_mem_add_ref((lt_mem_t *)relationdb->relation_l_s_entries,
 					       l, (lt_destroy_func_t)lt_list_free);
@@ -122,7 +122,7 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 			l = lt_trie_lookup(relationdb->relation_s_l_entries, p);
 			if (!l)
 				alloced = TRUE;
-			l = lt_list_append(l, lt_lang_ref(ol), (lt_destroy_func_t)lt_lang_unref);
+			l = lt_list_append(l, ol, (lt_destroy_func_t)lt_lang_unref);
 			if (alloced) {
 				lt_mem_add_ref((lt_mem_t *)relationdb->relation_s_l_entries,
 					       l, (lt_destroy_func_t)lt_list_free);
@@ -145,6 +145,10 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 		lt_error_unref(err);
 		retval = FALSE;
 	}
+	if (langdb)
+		lt_lang_db_unref(langdb);
+	if (scriptdb)
+		lt_script_db_unref(scriptdb);
 	if (xobj)
 		xmlXPathFreeObject(xobj);
 	if (xctxt)

@@ -1317,8 +1317,8 @@ _lt_tag_canonicalize(lt_tag_t    *tag,
 					lt_string_append_printf(string, "%s-", prefix);
 				lt_extlang_unref(e);
 			}
-			lt_extlang_db_unref(edb);
 		}
+		lt_extlang_db_unref(edb);
 
 		lt_string_append(string, lt_lang_get_better_tag(tag->language));
 		if (tag->extlang) {
@@ -2296,6 +2296,7 @@ lt_tag_transform(lt_tag_t    *tag,
 	  bail2:
 		if (xctxt)
 			xmlXPathFreeContext(xctxt);
+		lt_lang_unref(und);
 		lt_xml_unref(xml);
 	} LT_STMT_END;
   bail1:
