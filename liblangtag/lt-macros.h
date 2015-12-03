@@ -17,6 +17,7 @@
 #if defined(HAVE_SYS_PARAM_H) && HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#include <stddef.h>
 
 #ifndef __LT_MACROS_H__
 #define __LT_MACROS_H__
