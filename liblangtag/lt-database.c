@@ -29,14 +29,8 @@
  * This section describes convenient functions to obtain the database instance.
  */
 
-static lt_lang_db_t          *__db_lang = NULL;
-static lt_extlang_db_t       *__db_extlang = NULL;
-static lt_script_db_t        *__db_script = NULL;
-static lt_region_db_t        *__db_region = NULL;
-static lt_variant_db_t       *__db_variant = NULL;
-static lt_grandfathered_db_t *__db_grandfathered = NULL;
-static lt_redundant_db_t     *__db_redundant = NULL;
-static lt_relation_db_t      *__db_relation = NULL;
+static lt_db_val_t __dbval;
+static lt_db_val_t *__db_master = &__dbval;
 
 static char __lt_db_datadir[LT_PATH_MAX] = { 0 };
 
@@ -81,6 +75,20 @@ lt_db_get_datadir(void)
 }
 
 /**
+ * lt_db_set_val:
+ * @val: a #lt_db_val_t.
+ *
+ * Set @val as the master place of the database instance.
+ * This is useful if you don't want to held them into the global
+ * variable.
+ */
+void
+lt_db_set_val(lt_db_val_t *val)
+{
+	__db_master = val;
+}
+
+/**
  * lt_db_initialize:
  *
  * Initialize all of the language tags database instance.
@@ -90,21 +98,21 @@ lt_db_get_datadir(void)
 void
 lt_db_initialize(void)
 {
-	if (!__db_lang)
+	if (!__db_master->lang)
 		    lt_db_get_lang();
-	if (!__db_extlang)
+	if (!__db_master->extlang)
 		lt_db_get_extlang();
-	if (!__db_script)
+	if (!__db_master->script)
 		lt_db_get_script();
-	if (!__db_region)
+	if (!__db_master->region)
 		lt_db_get_region();
-	if (!__db_variant)
+	if (!__db_master->variant)
 		lt_db_get_variant();
-	if (!__db_grandfathered)
+	if (!__db_master->grandfathered)
 		lt_db_get_grandfathered();
-	if (!__db_redundant)
+	if (!__db_master->redundant)
 		lt_db_get_redundant();
-	if (!__db_relation)
+	if (!__db_master->relation)
 		lt_db_get_relation();
 	lt_ext_modules_load();
 }
@@ -118,14 +126,14 @@ lt_db_initialize(void)
 void
 lt_db_finalize(void)
 {
-	lt_lang_db_unref(__db_lang);
-	lt_extlang_db_unref(__db_extlang);
-	lt_script_db_unref(__db_script);
-	lt_region_db_unref(__db_region);
-	lt_variant_db_unref(__db_variant);
-	lt_grandfathered_db_unref(__db_grandfathered);
-	lt_redundant_db_unref(__db_redundant);
-	lt_relation_db_unref(__db_relation);
+	lt_lang_db_unref(__db_master->lang);
+	lt_extlang_db_unref(__db_master->extlang);
+	lt_script_db_unref(__db_master->script);
+	lt_region_db_unref(__db_master->region);
+	lt_variant_db_unref(__db_master->variant);
+	lt_grandfathered_db_unref(__db_master->grandfathered);
+	lt_redundant_db_unref(__db_master->redundant);
+	lt_relation_db_unref(__db_master->relation);
 	lt_ext_modules_unload();
 }
 
@@ -133,15 +141,15 @@ lt_db_finalize(void)
 	lt_ ##__type__## _db_t *					\
 	lt_db_get_ ##__type__ (void)					\
 	{								\
-		if (!__db_ ##__type__) {				\
-			__db_ ##__type__ = lt_ ##__type__## _db_new();	\
-			lt_mem_add_weak_pointer((lt_mem_t *)__db_ ##__type__, \
-						(lt_pointer_t *)&__db_ ##__type__); \
+		if (!__db_master->__type__) {				\
+			__db_master->__type__ = lt_ ##__type__## _db_new(); \
+			lt_mem_add_weak_pointer((lt_mem_t *)__db_master->__type__, \
+						(lt_pointer_t *)&__db_master->__type__); \
 		} else {						\
-			lt_ ##__type__## _db_ref(__db_ ##__type__);	\
+			lt_ ##__type__## _db_ref(__db_master->__type__); \
 		}							\
 									\
-		return __db_ ##__type__;				\
+		return __db_master->__type__;				\
 	}
 
 /**

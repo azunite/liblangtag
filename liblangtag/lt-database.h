@@ -29,8 +29,22 @@
 
 LT_BEGIN_DECLS
 
+typedef struct _lt_db_val_t	lt_db_val_t;
+
+struct _lt_db_val_t {
+	lt_lang_db_t          *lang;
+	lt_extlang_db_t       *extlang;
+	lt_script_db_t        *script;
+	lt_region_db_t        *region;
+	lt_variant_db_t       *variant;
+	lt_grandfathered_db_t *grandfathered;
+	lt_redundant_db_t     *redundant;
+	lt_relation_db_t      *relation;
+};
+
 void                   lt_db_set_datadir      (const char *path);
 const char            *lt_db_get_datadir      (void);
+void                   lt_db_set_val          (lt_db_val_t *val);
 void                   lt_db_initialize       (void);
 void                   lt_db_finalize         (void);
 lt_lang_db_t          *lt_db_get_lang         (void);
