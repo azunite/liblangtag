@@ -39,6 +39,7 @@ G_BEGIN_DECLS
 #define LT_TYPE_TAG			lt_tag_get_type()
 #define LT_TYPE_VARIANT_DB		lt_variant_db_get_type()
 #define LT_TYPE_VARIANT			lt_variant_get_type()
+#define LT_TYPE_RELATION_DB		lt_relation_db_get_type()
 
 
 GType lt_error_get_type           (void);
@@ -63,6 +64,7 @@ GType lt_string_get_type          (void);
 GType lt_tag_get_type             (void);
 GType lt_variant_db_get_type      (void);
 GType lt_variant_get_type         (void);
+GType lt_relation_db_get_type     (void);
 
 G_END_DECLS
 
