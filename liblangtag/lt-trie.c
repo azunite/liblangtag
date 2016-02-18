@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-trie.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2016 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -251,10 +251,7 @@ lt_trie_new(void)
 	lt_trie_t *retval = lt_mem_alloc_object(sizeof (lt_trie_t));
 
 	if (retval) {
-		lt_iter_tmpl_init(&retval->parent);
-		retval->parent.init = _lt_trie_iter_init;
-		retval->parent.fini = _lt_trie_iter_fini;
-		retval->parent.next = _lt_trie_iter_next;
+		LT_ITER_TMPL_INIT(&retval->parent, _lt_trie);
 	}
 
 	return retval;
@@ -352,13 +349,13 @@ lt_trie_keys(lt_trie_t *trie)
 
 	lt_return_val_if_fail (trie != NULL, NULL);
 
-	if (trie->root)
+	if (!trie->root)
 		return NULL;
 
 	iter = (lt_trie_iter_t *)lt_iter_init(&trie->parent);
 
-	while (lt_iter_next((lt_iter_t *)&iter, &key, NULL)) {
-		retval = lt_list_append(retval, key, free);
+	while (lt_iter_next((lt_iter_t *)iter, &key, NULL)) {
+		retval = lt_list_append(retval, strdup(key), free);
 	}
 
 	lt_iter_finish((lt_iter_t *)iter);
