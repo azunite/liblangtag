@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-region-db.c
- * Copyright (C) 2011-2012 Akira TAGOH
+ * Copyright (C) 2011-2016 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -180,12 +180,12 @@ _lt_region_db_iter_init(lt_iter_tmpl_t *tmpl)
 	lt_region_db_t *db = (lt_region_db_t *)tmpl;
 
 	retval = malloc(sizeof (lt_region_db_iter_t));
-	if (retval) {
-		retval->iter = LT_ITER_INIT (db->region_entries);
-		if (!retval->iter) {
-			free(retval);
-			retval = NULL;
-		}
+	if (!retval)
+		return NULL;
+	retval->iter = LT_ITER_INIT (db->region_entries);
+	if (!retval->iter) {
+		free(retval);
+		return NULL;
 	}
 
 	return &retval->parent;

@@ -166,20 +166,20 @@ _lt_trie_iter_init(lt_iter_tmpl_t *tmpl)
 	int i;
 
 	trie_iter = malloc(sizeof (lt_trie_iter_t));
-	if (trie_iter) {
-		trie_iter->pos_str = lt_string_new(NULL);
-		trie_iter->last_key = NULL;
-		trie_iter->stack = NULL;
-		if (trie->root) {
-			lt_trie_node_t *node = trie->root;
+	if (!trie_iter)
+		return NULL;
+	trie_iter->pos_str = lt_string_new(NULL);
+	trie_iter->last_key = NULL;
+	trie_iter->stack = NULL;
+	if (trie->root) {
+		lt_trie_node_t *node = trie->root;
 
-			for (i = 0; i < 255; i++) {
-				if (node->node[i])
-					trie_iter->stack = lt_list_append(trie_iter->stack, node->node[i], NULL);
-			}
-			/* add a terminator */
-			trie_iter->stack = lt_list_append(trie_iter->stack, NULL, NULL);
+		for (i = 0; i < 255; i++) {
+			if (node->node[i])
+				trie_iter->stack = lt_list_append(trie_iter->stack, node->node[i], NULL);
 		}
+		/* add a terminator */
+		trie_iter->stack = lt_list_append(trie_iter->stack, NULL, NULL);
 	}
 
 	return &trie_iter->parent;
