@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-xml.c
- * Copyright (C) 2011-2015 Akira TAGOH
+ * Copyright (C) 2011-2016 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -15,6 +15,7 @@
 #endif
 
 #include <stddef.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -24,6 +25,7 @@
 #include "lt-messages.h"
 #include "lt-database.h"
 #include "lt-string.h"
+#include "lt-utils.h"
 #include "lt-xml.h"
 
 
@@ -323,97 +325,12 @@ _lt_xml_merge_keys(lt_xml_t    *xml,
 lt_xml_t *
 lt_xml_new(void)
 {
-	lt_error_t *err = NULL;
-
-	LT_LOCK (xml);
-
-	if (__xml) {
-		LT_UNLOCK (xml);
-
+	if (__xml)
 		return lt_xml_ref(__xml);
-	}
 
 	__xml = lt_mem_alloc_object(sizeof (lt_xml_t));
-	if (__xml) {
-		xmlDocPtr doc = NULL;
-
+	if (__xml)
 		lt_mem_add_weak_pointer(&__xml->parent, (lt_pointer_t *)&__xml);
-		if (!lt_xml_read_subtag_registry(__xml, &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "calendar.xml",
-					    &__xml->cldr_bcp47_calendar,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "collation.xml",
-					    &__xml->cldr_bcp47_collation,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "currency.xml",
-					    &__xml->cldr_bcp47_currency,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "number.xml",
-					    &__xml->cldr_bcp47_number,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "timezone.xml",
-					    &__xml->cldr_bcp47_timezone,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "transform.xml",
-					    &__xml->cldr_bcp47_transform,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "transform_ime.xml",
-					    &doc,
-					    &err))
-			goto bail;
-		if (!_lt_xml_merge_keys(__xml, __xml->cldr_bcp47_transform, doc, &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "transform_keyboard.xml",
-					    &doc,
-					    &err))
-			goto bail;
-		if (!_lt_xml_merge_keys(__xml, __xml->cldr_bcp47_transform, doc, &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "transform_mt.xml",
-					    &doc,
-					    &err))
-			goto bail;
-		if (!_lt_xml_merge_keys(__xml, __xml->cldr_bcp47_transform, doc, &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "transform_private_use.xml",
-					    &doc,
-					    &err))
-			goto bail;
-		if (!_lt_xml_merge_keys(__xml, __xml->cldr_bcp47_transform, doc, &err))
-			goto bail;
-		if (!lt_xml_read_cldr_bcp47(__xml, "variant.xml",
-					    &__xml->cldr_bcp47_variant,
-					    &err))
-			goto bail;
-		if (!lt_xml_read_cldr_supplemental(__xml, "likelySubtags.xml",
-						   &__xml->cldr_supplemental_likelysubtags,
-						   &err))
-			goto bail;
-		if (!lt_xml_read_cldr_supplemental(__xml, "supplementalData.xml",
-						   &__xml->cldr_supplemental_supplementaldata,
-						   &err))
-			goto bail;
-		if (!lt_xml_read_cldr_supplemental(__xml, "supplementalMetadata.xml",
-						   &__xml->cldr_supplemental_supplementalmetadata,
-						   &err))
-			goto bail;
-	}
-
-  bail:
-	if (lt_error_is_set(err, LT_ERR_ANY)) {
-		lt_error_print(err, LT_ERR_ANY);
-		lt_error_unref(err);
-		lt_xml_unref(__xml);
-	}
-
-	LT_UNLOCK (xml);
 
 	return __xml;
 }
@@ -436,7 +353,20 @@ lt_xml_unref(lt_xml_t *xml)
 xmlDocPtr
 lt_xml_get_subtag_registry(lt_xml_t *xml)
 {
+	lt_error_t *err = NULL;
+
 	lt_return_val_if_fail (xml != NULL, NULL);
+
+	LT_LOCK (xml);
+	if (!xml->subtag_registry) {
+		if (!lt_xml_read_subtag_registry(xml, &err)) {
+			LT_UNLOCK (xml);
+			lt_error_print(err, LT_ERR_ANY);
+			lt_error_unref(err);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (xml);
 
 	return xml->subtag_registry;
 }
@@ -445,19 +375,67 @@ xmlDocPtr
 lt_xml_get_cldr(lt_xml_t      *xml,
 		lt_xml_cldr_t  type)
 {
+	lt_error_t *err = NULL;
+	lt_bool_t ret = FALSE;
 	xmlDocPtr *pref;
 	int idx;
+	const char *xml_files[] = {
+		"calendar.xml", "collation.xml", "currency.xml", "number.xml", "timezone.xml", "transform.xml:transform_ime.xml:transform_keyboard.xml:transform_mt.xml:transform_private_use.xml", "variant.xml",
+		"likelySubtags.xml", "supplementalData.xml", "supplementalMetadata.xml",
+		NULL
+	};
 
 	LT_ASSERT_STATIC ((sizeof (lt_xml_t) - offsetof (lt_xml_t, cldr_bcp47_calendar)) == (sizeof (lt_pointer_t) * ((LT_XML_CLDR_BCP47_END - LT_XML_CLDR_BCP47_BEGIN + 1) + (LT_XML_CLDR_SUPPLEMENTAL_END - LT_XML_CLDR_SUPPLEMENTAL_BEGIN + 1))));
 
 	lt_return_val_if_fail (xml != NULL, NULL);
 	lt_return_val_if_fail (type > LT_XML_CLDR_BEGIN && type < LT_XML_CLDR_END, NULL);
 
+	LT_LOCK (xml);
 	pref = &xml->cldr_bcp47_calendar;
 	if (type >= LT_XML_CLDR_DUMMY1)
 		idx = type - LT_XML_CLDR_DUMMY1 + LT_XML_CLDR_BCP47_END;
 	else
 		idx = type;
+
+	if (!pref[idx - 1]) {
+		if (type >= LT_XML_CLDR_DUMMY1) {
+			ret = lt_xml_read_cldr_supplemental(xml, xml_files[idx - 1], &pref[idx - 1], &err);
+		} else if (type == LT_XML_CLDR_BCP47_TRANSFORM) {
+			const char *pp = xml_files[idx - 1];
+			char *p, *s;
+			xmlDocPtr *d = &pref[idx - 1], doc = NULL;
+
+			do {
+				p = index(pp, ':');
+				if (p)
+					s = lt_strndup(pp, p - pp);
+				else
+					s = strdup(pp);
+				if (!lt_xml_read_cldr_bcp47(xml, s, d, &err))
+					goto bail;
+				if (d == &doc) {
+					if (!_lt_xml_merge_keys(xml, pref[idx - 1], doc, &err))
+						goto bail;
+				} else {
+					d = &doc;
+				}
+				free(s);
+				if (p)
+					pp = ++p;
+			} while (p);
+			ret = TRUE;
+		} else {
+			ret = lt_xml_read_cldr_bcp47(xml, xml_files[idx - 1], &pref[idx - 1], &err);
+		}
+	  bail:
+		if (!ret) {
+			LT_UNLOCK (xml);
+			lt_error_print(err, LT_ERR_ANY);
+			lt_error_unref(err);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (xml);
 
 	return pref[idx - 1];
 }

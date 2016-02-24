@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-relation-db.c
- * Copyright (C) 2015 Akira TAGOH
+ * Copyright (C) 2015-2016 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -20,6 +20,7 @@
 #include "lt-database.h"
 #include "lt-error.h"
 #include "lt-list.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -36,10 +37,11 @@
  */
 struct _lt_relation_db_t {
 	lt_mem_t   parent;
-	lt_xml_t  *xml;
 	lt_trie_t *relation_l_s_entries;
 	lt_trie_t *relation_s_l_entries;
 };
+
+LT_LOCK_DEFINE_STATIC (rdb);
 
 /*< private >*/
 static lt_bool_t
@@ -54,10 +56,19 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 	int i, n;
 	lt_lang_db_t *langdb = NULL;
 	lt_script_db_t *scriptdb = NULL;
+	lt_xml_t *xml;
 
 	lt_return_val_if_fail (relationdb != NULL, FALSE);
 
-	doc = lt_xml_get_cldr(relationdb->xml, LT_XML_CLDR_SUPPLEMENTAL_SUPPLEMENTAL_DATA);
+	relationdb->relation_l_s_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)relationdb, relationdb->relation_l_s_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+	relationdb->relation_s_l_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)relationdb, relationdb->relation_s_l_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+
+	xml = lt_xml_new();
+	doc = lt_xml_get_cldr(xml, LT_XML_CLDR_SUPPLEMENTAL_SUPPLEMENTAL_DATA);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -153,6 +164,8 @@ lt_relation_db_parse(lt_relation_db_t  *relationdb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -170,33 +183,6 @@ lt_relation_db_new(void)
 {
 	lt_relation_db_t *retval = lt_mem_alloc_object(sizeof (lt_relation_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-
-		retval->relation_l_s_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->relation_l_s_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-		retval->relation_s_l_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->relation_s_l_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_relation_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-
-		lt_relation_db_parse(retval, &err);
-		if (lt_error_is_set(err, LT_ERR_ANY)) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_relation_db_unref(retval);
-			retval = NULL;
-			lt_error_unref(err);
-		}
-	}
-  bail:
 	return retval;
 }
 
@@ -244,6 +230,15 @@ lt_relation_db_lookup_lang_from_script(lt_relation_db_t  *relationdb,
 	lt_return_val_if_fail (relationdb != NULL, NULL);
 	lt_return_val_if_fail (script != NULL, NULL);
 
+	LT_LOCK (rdb);
+	if (!relationdb->relation_s_l_entries) {
+		if (!lt_relation_db_parse(relationdb, NULL)) {
+			LT_UNLOCK (rdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (rdb);
+
 	key = strdup(lt_script_get_name(script));
 	l = lt_trie_lookup(relationdb->relation_s_l_entries,
 			   lt_strlower(key));
@@ -271,6 +266,15 @@ lt_relation_db_lookup_script_from_lang(lt_relation_db_t *relationdb,
 
 	lt_return_val_if_fail (relationdb != NULL, NULL);
 	lt_return_val_if_fail (lang != NULL, NULL);
+
+	LT_LOCK (rdb);
+	if (!relationdb->relation_l_s_entries) {
+		if (!lt_relation_db_parse(relationdb, NULL)) {
+			LT_UNLOCK (rdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (rdb);
 
 	key = strdup(lt_lang_get_tag(lang));
 	l = lt_trie_lookup(relationdb->relation_l_s_entries,

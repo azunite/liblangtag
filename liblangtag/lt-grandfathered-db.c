@@ -20,6 +20,7 @@
 #include "lt-grandfathered.h"
 #include "lt-grandfathered-private.h"
 #include "lt-iter-private.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -38,7 +39,6 @@
  */
 struct _lt_grandfathered_db_t {
 	lt_iter_tmpl_t  parent;
-	lt_xml_t       *xml;
 	lt_trie_t      *grandfathered_entries;
 };
 typedef struct _lt_grandfathered_db_iter_t {
@@ -46,11 +46,14 @@ typedef struct _lt_grandfathered_db_iter_t {
 	lt_iter_t *iter;
 } lt_grandfathered_db_iter_t;
 
+LT_LOCK_DEFINE_STATIC (gdb);
+
 /*< private >*/
 static lt_bool_t
 lt_grandfathered_db_parse(lt_grandfathered_db_t  *grandfathereddb,
 			  lt_error_t            **error)
 {
+	lt_xml_t *xml;
 	lt_bool_t retval = TRUE;
 	xmlDocPtr doc = NULL;
 	xmlXPathContextPtr xctxt = NULL;
@@ -60,7 +63,12 @@ lt_grandfathered_db_parse(lt_grandfathered_db_t  *grandfathereddb,
 
 	lt_return_val_if_fail (grandfathereddb != NULL, FALSE);
 
-	doc = lt_xml_get_subtag_registry(grandfathereddb->xml);
+	xml = lt_xml_new();
+	grandfathereddb->grandfathered_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)grandfathereddb, grandfathereddb->grandfathered_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+
+	doc = lt_xml_get_subtag_registry(xml);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -168,6 +176,8 @@ lt_grandfathered_db_parse(lt_grandfathered_db_t  *grandfathereddb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -177,6 +187,15 @@ _lt_grandfathered_db_iter_init(lt_iter_tmpl_t *tmpl)
 {
 	lt_grandfathered_db_iter_t *retval;
 	lt_grandfathered_db_t *db = (lt_grandfathered_db_t *)tmpl;
+
+	LT_LOCK (gdb);
+	if (!db->grandfathered_entries) {
+		if (!lt_grandfathered_db_parse(db, NULL)) {
+			LT_UNLOCK (gdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (gdb);
 
 	retval = malloc(sizeof (lt_grandfathered_db_iter_t));
 	if (!retval)
@@ -221,33 +240,8 @@ lt_grandfathered_db_new(void)
 {
 	lt_grandfathered_db_t *retval = lt_mem_alloc_object(sizeof (lt_grandfathered_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-
+	if (retval)
 		LT_ITER_TMPL_INIT (&retval->parent, _lt_grandfathered_db);
-
-		retval->grandfathered_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->grandfathered_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_grandfathered_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-
-		lt_grandfathered_db_parse(retval, &err);
-		if (lt_error_is_set(err, LT_ERR_ANY)) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_grandfathered_db_unref(retval);
-			retval = NULL;
-			lt_error_unref(err);
-		}
-	}
-  bail:
 
 	return retval;
 }
@@ -301,6 +295,15 @@ lt_grandfathered_db_lookup(lt_grandfathered_db_t *grandfathereddb,
 
 	lt_return_val_if_fail (grandfathereddb != NULL, NULL);
 	lt_return_val_if_fail (tag != NULL, NULL);
+
+	LT_LOCK (gdb);
+	if (!grandfathereddb->grandfathered_entries) {
+		if (!lt_grandfathered_db_parse(grandfathereddb, NULL)) {
+			LT_UNLOCK (gdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (gdb);
 
 	s = strdup(tag);
 	retval = lt_trie_lookup(grandfathereddb->grandfathered_entries,

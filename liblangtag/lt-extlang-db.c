@@ -20,6 +20,7 @@
 #include "lt-extlang.h"
 #include "lt-extlang-private.h"
 #include "lt-iter-private.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -38,7 +39,6 @@
  */
 struct _lt_extlang_db_t {
 	lt_iter_tmpl_t  parent;
-	lt_xml_t       *xml;
 	lt_trie_t      *extlang_entries;
 };
 typedef struct _lt_extlang_db_iter_t {
@@ -46,21 +46,44 @@ typedef struct _lt_extlang_db_iter_t {
 	lt_iter_t *iter;
 } lt_extlang_db_iter_t;
 
+LT_LOCK_DEFINE_STATIC (edb);
+
 /*< private >*/
 static lt_bool_t
 lt_extlang_db_parse(lt_extlang_db_t  *extlangdb,
 		    lt_error_t      **error)
 {
+	lt_xml_t *xml;
 	lt_bool_t retval = TRUE;
 	xmlDocPtr doc = NULL;
 	xmlXPathContextPtr xctxt = NULL;
 	xmlXPathObjectPtr xobj = NULL;
 	lt_error_t *err = NULL;
 	int i, n;
+	lt_extlang_t *le;
 
 	lt_return_val_if_fail (extlangdb != NULL, FALSE);
 
-	doc = lt_xml_get_subtag_registry(extlangdb->xml);
+	extlangdb->extlang_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)extlangdb, extlangdb->extlang_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+	le = lt_extlang_create();
+	lt_extlang_set_tag(le, "*");
+	lt_extlang_set_name(le, "Wildcard entry");
+	lt_trie_replace(extlangdb->extlang_entries,
+			lt_extlang_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_extlang_unref);
+	le = lt_extlang_create();
+	lt_extlang_set_tag(le, "");
+	lt_extlang_set_name(le, "Empty entry");
+	lt_trie_replace(extlangdb->extlang_entries,
+			lt_extlang_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_extlang_unref);
+
+	xml = lt_xml_new();
+	doc = lt_xml_get_subtag_registry(xml);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -189,6 +212,8 @@ lt_extlang_db_parse(lt_extlang_db_t  *extlangdb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -198,6 +223,15 @@ _lt_extlang_db_iter_init(lt_iter_tmpl_t *tmpl)
 {
 	lt_extlang_db_iter_t *retval;
 	lt_extlang_db_t *extlangdb = (lt_extlang_db_t *)tmpl;
+
+	LT_LOCK (edb);
+	if (!extlangdb->extlang_entries) {
+		if (!lt_extlang_db_parse(extlangdb, NULL)) {
+			LT_UNLOCK (edb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (edb);
 
 	retval = malloc(sizeof (lt_extlang_db_iter_t));
 	if (!retval)
@@ -242,48 +276,8 @@ lt_extlang_db_new(void)
 {
 	lt_extlang_db_t *retval = lt_mem_alloc_object(sizeof (lt_extlang_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-		lt_extlang_t *le;
-
+	if (retval)
 		LT_ITER_TMPL_INIT (&retval->parent, _lt_extlang_db);
-
-		retval->extlang_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->extlang_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-
-		le = lt_extlang_create();
-		lt_extlang_set_tag(le, "*");
-		lt_extlang_set_name(le, "Wildcard entry");
-		lt_trie_replace(retval->extlang_entries,
-				lt_extlang_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_extlang_unref);
-		le = lt_extlang_create();
-		lt_extlang_set_tag(le, "");
-		lt_extlang_set_name(le, "Empty entry");
-		lt_trie_replace(retval->extlang_entries,
-				lt_extlang_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_extlang_unref);
-
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_extlang_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-		lt_extlang_db_parse(retval, &err);
-		if (err) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_extlang_db_unref(retval);
-			retval = NULL;
-			lt_error_unref(err);
-		}
-	}
-  bail:
 
 	return retval;
 }
@@ -337,6 +331,15 @@ lt_extlang_db_lookup(lt_extlang_db_t *extlangdb,
 
 	lt_return_val_if_fail (extlangdb != NULL, NULL);
 	lt_return_val_if_fail (subtag != NULL, NULL);
+
+	LT_LOCK (edb);
+	if (!extlangdb->extlang_entries) {
+		if (!lt_extlang_db_parse(extlangdb, NULL)) {
+			LT_UNLOCK (edb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (edb);
 
 	s = strdup(subtag);
 	retval = lt_trie_lookup(extlangdb->extlang_entries,

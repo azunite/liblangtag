@@ -18,6 +18,7 @@
 #include <libxml/xpath.h>
 #include "lt-error.h"
 #include "lt-iter-private.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -37,7 +38,6 @@
  */
 struct _lt_lang_db_t {
 	lt_iter_tmpl_t  parent;
-	lt_xml_t       *xml;
 	lt_trie_t      *lang_entries;
 };
 typedef struct _lt_lang_db_iter_t {
@@ -45,11 +45,15 @@ typedef struct _lt_lang_db_iter_t {
 	lt_iter_t *iter;
 } lt_lang_db_iter_t;
 
+LT_LOCK_DEFINE_STATIC (ldb);
+
 /*< private >*/
 static lt_bool_t
 lt_lang_db_parse(lt_lang_db_t  *langdb,
 		 lt_error_t   **error)
 {
+	lt_xml_t *xml;
+	lt_lang_t *le;
 	lt_bool_t retval = TRUE;
 	xmlDocPtr doc = NULL;
 	xmlXPathContextPtr xctxt = NULL;
@@ -59,7 +63,19 @@ lt_lang_db_parse(lt_lang_db_t  *langdb,
 
 	lt_return_val_if_fail (langdb != NULL, FALSE);
 
-	doc = lt_xml_get_subtag_registry(langdb->xml);
+	langdb->lang_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)langdb, langdb->lang_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+	le = lt_lang_create();
+	lt_lang_set_tag(le, "*");
+	lt_lang_set_name(le, "Wildcard entry");
+	lt_trie_replace(langdb->lang_entries,
+			lt_lang_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_lang_unref);
+
+	xml = lt_xml_new();
+	doc = lt_xml_get_subtag_registry(xml);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -201,6 +217,8 @@ lt_lang_db_parse(lt_lang_db_t  *langdb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -210,6 +228,15 @@ _lt_lang_db_iter_init(lt_iter_tmpl_t *tmpl)
 {
 	lt_lang_db_iter_t *retval;
 	lt_lang_db_t *langdb = (lt_lang_db_t *)tmpl;
+
+	LT_LOCK (ldb);
+	if (!langdb->lang_entries) {
+		if (!lt_lang_db_parse(langdb, NULL)) {
+			LT_UNLOCK (ldb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (ldb);
 
 	retval = malloc(sizeof (lt_lang_db_iter_t));
 	if (!retval)
@@ -254,42 +281,8 @@ lt_lang_db_new(void)
 {
 	lt_lang_db_t *retval = lt_mem_alloc_object(sizeof (lt_lang_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-		lt_lang_t *le;
-
+	if (retval)
 		LT_ITER_TMPL_INIT (&retval->parent, _lt_lang_db);
-
-		retval->lang_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->lang_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-
-		le = lt_lang_create();
-		lt_lang_set_tag(le, "*");
-		lt_lang_set_name(le, "Wildcard entry");
-		lt_trie_replace(retval->lang_entries,
-				lt_lang_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_lang_unref);
-
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_lang_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-
-		lt_lang_db_parse(retval, &err);
-		if (lt_error_is_set(err, LT_ERR_ANY)) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_lang_db_unref(retval);
-			retval = NULL;
-			lt_error_unref(err);
-		}
-	}
-  bail:
 
 	return retval;
 }
@@ -343,6 +336,15 @@ lt_lang_db_lookup(lt_lang_db_t *langdb,
 
 	lt_return_val_if_fail (langdb != NULL, NULL);
 	lt_return_val_if_fail (subtag != NULL, NULL);
+
+	LT_LOCK (ldb);
+	if (!langdb->lang_entries) {
+		if (!lt_lang_db_parse(langdb, NULL)) {
+			LT_UNLOCK (ldb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (ldb);
 
 	s = strdup(subtag);
 	retval = lt_trie_lookup(langdb->lang_entries, lt_strlower(s));

@@ -22,6 +22,7 @@
 #include "lt-variant.h"
 #include "lt-variant-private.h"
 #include "lt-list.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -40,7 +41,6 @@
  */
 struct _lt_variant_db_t {
 	lt_iter_tmpl_t  parent;
-	lt_xml_t       *xml;
 	lt_trie_t      *variant_entries;
 };
 typedef struct _lt_variant_db_iter_t {
@@ -48,11 +48,15 @@ typedef struct _lt_variant_db_iter_t {
 	lt_iter_t *iter;
 } lt_variant_db_iter_t;
 
+LT_LOCK_DEFINE_STATIC (vdb);
+
 /*< private >*/
 static lt_bool_t
 lt_variant_db_parse(lt_variant_db_t  *variantdb,
 		    lt_error_t      **error)
 {
+	lt_xml_t *xml;
+	lt_variant_t *le;
 	lt_bool_t retval = TRUE;
 	xmlDocPtr doc = NULL;
 	xmlXPathContextPtr xctxt = NULL;
@@ -62,7 +66,26 @@ lt_variant_db_parse(lt_variant_db_t  *variantdb,
 
 	lt_return_val_if_fail (variantdb != NULL, FALSE);
 
-	doc = lt_xml_get_subtag_registry(variantdb->xml);
+	variantdb->variant_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)variantdb, variantdb->variant_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+	le = lt_variant_create();
+	lt_variant_set_tag(le, "*");
+	lt_variant_set_name(le, "Wildcard entry");
+	lt_trie_replace(variantdb->variant_entries,
+			lt_variant_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_variant_unref);
+	le = lt_variant_create();
+	lt_variant_set_tag(le, "");
+	lt_variant_set_name(le, "Empty entry");
+	lt_trie_replace(variantdb->variant_entries,
+			lt_variant_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_variant_unref);
+
+	xml = lt_xml_new();
+	doc = lt_xml_get_subtag_registry(xml);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -179,6 +202,8 @@ lt_variant_db_parse(lt_variant_db_t  *variantdb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -188,6 +213,15 @@ _lt_variant_db_iter_init(lt_iter_tmpl_t *tmpl)
 {
 	lt_variant_db_iter_t *retval;
 	lt_variant_db_t *db = (lt_variant_db_t *)tmpl;
+
+	LT_LOCK (vdb);
+	if (!db->variant_entries) {
+		if (!lt_variant_db_parse(db, NULL)) {
+			LT_UNLOCK (vdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (vdb);
 
 	retval = malloc(sizeof (lt_variant_db_iter_t));
 	if (!retval)
@@ -232,49 +266,8 @@ lt_variant_db_new(void)
 {
 	lt_variant_db_t *retval = lt_mem_alloc_object(sizeof (lt_variant_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-		lt_variant_t *le;
-
+	if (retval)
 		LT_ITER_TMPL_INIT (&retval->parent, _lt_variant_db);
-
-		retval->variant_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->variant_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-
-		le = lt_variant_create();
-		lt_variant_set_tag(le, "*");
-		lt_variant_set_name(le, "Wildcard entry");
-		lt_trie_replace(retval->variant_entries,
-				lt_variant_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_variant_unref);
-		le = lt_variant_create();
-		lt_variant_set_tag(le, "");
-		lt_variant_set_name(le, "Empty entry");
-		lt_trie_replace(retval->variant_entries,
-				lt_variant_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_variant_unref);
-
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_variant_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-
-		lt_variant_db_parse(retval, &err);
-		if (lt_error_is_set(err, LT_ERR_ANY)) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_error_unref(err);
-			lt_variant_db_unref(retval);
-			retval = NULL;
-		}
-	}
-  bail:
 
 	return retval;
 }
@@ -328,6 +321,15 @@ lt_variant_db_lookup(lt_variant_db_t *variantdb,
 
 	lt_return_val_if_fail (variantdb != NULL, NULL);
 	lt_return_val_if_fail (subtag != NULL, NULL);
+
+	LT_LOCK (vdb);
+	if (!variantdb->variant_entries) {
+		if (!lt_variant_db_parse(variantdb, NULL)) {
+			LT_UNLOCK (vdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (vdb);
 
 	s = strdup(subtag);
 	retval = lt_trie_lookup(variantdb->variant_entries,

@@ -19,6 +19,7 @@
 #include <libxml/xpath.h>
 #include "lt-error.h"
 #include "lt-iter-private.h"
+#include "lt-lock.h"
 #include "lt-mem.h"
 #include "lt-messages.h"
 #include "lt-trie.h"
@@ -38,7 +39,6 @@
  */
 struct _lt_script_db_t {
 	lt_iter_tmpl_t  parent;
-	lt_xml_t       *xml;
 	lt_trie_t      *script_entries;
 };
 typedef struct _lt_script_db_iter_t {
@@ -46,11 +46,15 @@ typedef struct _lt_script_db_iter_t {
 	lt_iter_t *iter;
 } lt_script_db_iter_t;
 
+LT_LOCK_DEFINE_STATIC (sdb);
+
 /*< private >*/
 static lt_bool_t
 lt_script_db_parse(lt_script_db_t  *scriptdb,
 		   lt_error_t     **error)
 {
+	lt_xml_t *xml;
+	lt_script_t *le;
 	lt_bool_t retval = TRUE;
 	xmlDocPtr doc = NULL;
 	xmlXPathContextPtr xctxt = NULL;
@@ -60,7 +64,26 @@ lt_script_db_parse(lt_script_db_t  *scriptdb,
 
 	lt_return_val_if_fail (scriptdb != NULL, FALSE);
 
-	doc = lt_xml_get_subtag_registry(scriptdb->xml);
+	scriptdb->script_entries = lt_trie_new();
+	lt_mem_add_ref((lt_mem_t *)scriptdb, scriptdb->script_entries,
+		       (lt_destroy_func_t)lt_trie_unref);
+	le = lt_script_create();
+	lt_script_set_tag(le, "*");
+	lt_script_set_name(le, "Wildcard entry");
+	lt_trie_replace(scriptdb->script_entries,
+			lt_script_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_script_unref);
+	le = lt_script_create();
+	lt_script_set_tag(le, "");
+	lt_script_set_name(le, "Empty entry");
+	lt_trie_replace(scriptdb->script_entries,
+			lt_script_get_tag(le),
+			le,
+			(lt_destroy_func_t)lt_script_unref);
+
+	xml = lt_xml_new();
+	doc = lt_xml_get_subtag_registry(xml);
 	xctxt = xmlXPathNewContext(doc);
 	if (!xctxt) {
 		lt_error_set(&err, LT_ERR_OOM,
@@ -156,6 +179,8 @@ lt_script_db_parse(lt_script_db_t  *scriptdb,
 		xmlXPathFreeObject(xobj);
 	if (xctxt)
 		xmlXPathFreeContext(xctxt);
+	if (xml)
+		lt_xml_unref(xml);
 
 	return retval;
 }
@@ -165,6 +190,15 @@ _lt_script_db_iter_init(lt_iter_tmpl_t *tmpl)
 {
 	lt_script_db_iter_t *retval;
 	lt_script_db_t *db = (lt_script_db_t *)tmpl;
+
+	LT_LOCK (sdb);
+	if (!db->script_entries) {
+		if (!lt_script_db_parse(db, NULL)) {
+			LT_UNLOCK (sdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (sdb);
 
 	retval = malloc(sizeof (lt_script_db_iter_t));
 	if (!retval)
@@ -209,49 +243,8 @@ lt_script_db_new(void)
 {
 	lt_script_db_t *retval = lt_mem_alloc_object(sizeof (lt_script_db_t));
 
-	if (retval) {
-		lt_error_t *err = NULL;
-		lt_script_t *le;
-
+	if (retval)
 		LT_ITER_TMPL_INIT (&retval->parent, _lt_script_db);
-
-		retval->script_entries = lt_trie_new();
-		lt_mem_add_ref((lt_mem_t *)retval, retval->script_entries,
-			       (lt_destroy_func_t)lt_trie_unref);
-
-		le = lt_script_create();
-		lt_script_set_tag(le, "*");
-		lt_script_set_name(le, "Wildcard entry");
-		lt_trie_replace(retval->script_entries,
-				lt_script_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_script_unref);
-		le = lt_script_create();
-		lt_script_set_tag(le, "");
-		lt_script_set_name(le, "Empty entry");
-		lt_trie_replace(retval->script_entries,
-				lt_script_get_tag(le),
-				le,
-				(lt_destroy_func_t)lt_script_unref);
-
-		retval->xml = lt_xml_new();
-		if (!retval->xml) {
-			lt_script_db_unref(retval);
-			retval = NULL;
-			goto bail;
-		}
-		lt_mem_add_ref((lt_mem_t *)retval, retval->xml,
-			       (lt_destroy_func_t)lt_xml_unref);
-
-		lt_script_db_parse(retval, &err);
-		if (lt_error_is_set(err, LT_ERR_ANY)) {
-			lt_error_print(err, LT_ERR_ANY);
-			lt_script_db_unref(retval);
-			retval = NULL;
-			lt_error_unref(err);
-		}
-	}
-  bail:
 
 	return retval;
 }
@@ -305,6 +298,15 @@ lt_script_db_lookup(lt_script_db_t *scriptdb,
 
 	lt_return_val_if_fail (scriptdb != NULL, NULL);
 	lt_return_val_if_fail (subtag != NULL, NULL);
+
+	LT_LOCK (sdb);
+	if (!scriptdb->script_entries) {
+		if (!lt_script_db_parse(scriptdb, NULL)) {
+			LT_UNLOCK (sdb);
+			return NULL;
+		}
+	}
+	LT_UNLOCK (sdb);
 
 	s = strdup(subtag);
 	retval = lt_trie_lookup(scriptdb->script_entries,

@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* 
  * lt-database.c
- * Copyright (C) 2011-2015 Akira TAGOH
+ * Copyright (C) 2011-2016 Akira TAGOH
  * 
  * Authors:
  *   Akira TAGOH  <akira@tagoh.org>
@@ -18,6 +18,7 @@
 #include "lt-mem.h"
 #include "lt-ext-module.h"
 #include "lt-utils.h"
+#include "lt-xml.h"
 #include "lt-database.h"
 
 
@@ -31,6 +32,7 @@
 
 static lt_db_val_t __dbval;
 static lt_db_val_t *__db_master = &__dbval;
+static lt_xml_t *__db_xml = NULL;
 
 static char __lt_db_datadir[LT_PATH_MAX] = { 0 };
 
@@ -114,6 +116,11 @@ lt_db_initialize(void)
 		lt_db_get_redundant();
 	if (!__db_master->relation)
 		lt_db_get_relation();
+	if (!__db_xml) {
+		__db_xml = lt_xml_new();
+		lt_mem_add_weak_pointer((lt_mem_t *)__db_xml,
+					(lt_pointer_t *)&__db_xml);
+	}
 	lt_ext_modules_load();
 }
 
@@ -134,6 +141,7 @@ lt_db_finalize(void)
 	lt_grandfathered_db_unref(__db_master->grandfathered);
 	lt_redundant_db_unref(__db_master->redundant);
 	lt_relation_db_unref(__db_master->relation);
+	lt_xml_unref(__db_xml);
 	lt_ext_modules_unload();
 }
 
