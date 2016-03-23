@@ -218,7 +218,12 @@ lt_relation_db_unref(lt_relation_db_t *relationdb)
 
 /**
  * lt_relation_db_lookup_lang_from_script:
+ * @relationdb: a #lt_relation_db_t.
+ * @script: a #lt_script_t.
  *
+ * Look up the languages corresponding to the script @script.
+ *
+ * Returns: (transfer full): a #lt_list_t containing #lt_lang_t object.
  */
 lt_list_t *
 lt_relation_db_lookup_lang_from_script(lt_relation_db_t  *relationdb,
@@ -255,7 +260,12 @@ lt_relation_db_lookup_lang_from_script(lt_relation_db_t  *relationdb,
 
 /**
  * lt_relation_db_lookup_script_from_lang:
+ * @relationdb: a #lt_relation_db_t.
+ * @lang: a #lt_lang_t.
  *
+ * Look up the scripts corresponding to the language @lang.
+ *
+ * Returns: (transfer full): a #lt_list_t containing #lt_script_t objects.
  */
 lt_list_t *
 lt_relation_db_lookup_script_from_lang(lt_relation_db_t *relationdb,
@@ -283,7 +293,7 @@ lt_relation_db_lookup_script_from_lang(lt_relation_db_t *relationdb,
 
 	for (ll = l; ll; ll = lt_list_next(ll)) {
 		retval = lt_list_append(retval,
-					lt_lang_ref(lt_list_value(ll)),
+					lt_script_ref(lt_list_value(ll)),
 					(lt_destroy_func_t)lt_lang_unref);
 	}
 

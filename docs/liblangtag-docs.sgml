@@ -27,6 +27,7 @@
       <xi:include href="xml/lt-lang-db.xml"/>
       <xi:include href="xml/lt-redundant-db.xml"/>
       <xi:include href="xml/lt-region-db.xml"/>
+      <xi:include href="xml/lt-relation-db.xml"/>
       <xi:include href="xml/lt-script-db.xml"/>
       <xi:include href="xml/lt-variant-db.xml"/>
     </section>

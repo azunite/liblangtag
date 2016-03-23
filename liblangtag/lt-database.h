@@ -31,6 +31,20 @@ LT_BEGIN_DECLS
 
 typedef struct _lt_db_val_t	lt_db_val_t;
 
+/**
+ * lt_db_val_t:
+ * @lang: The placeholder to store the object of #lt_lang_db_t.
+ * @extlang: The placeholder to store the object of #lt_extlang_db_t.
+ * @script: The placeholder to sthre the object of #lt_script_db_t.
+ * @region: The placeholder to store the object of #lt_region_db_t.
+ * @variant: The placeholder to store the object of #lt_variant_db_t.
+ * @grandfathered: The placeholder to store the object of #lt_grandfathered_db_t.
+ * @redundant: The placeholder to store the object of #lt_redundant_db_t.
+ * @relation: The placeholder to store the object of #lt_relation_db_t.
+ *
+ * The database set of structure to peek instances of them. this is useful
+ * for the debugging purpose only.
+ */
 struct _lt_db_val_t {
 	lt_lang_db_t          *lang;
 	lt_extlang_db_t       *extlang;

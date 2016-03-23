@@ -39,6 +39,16 @@ typedef struct _lt_tag_t	lt_tag_t;
 
 /**
  * lt_tag_filter_t:
+ * @LT_TAG_FILTER_NONE: all of objects filtered.
+ * @LT_TAG_FILTER_LANGUAGE: include #lt_lang_t object into the result.
+ * @LT_TAG_FILTER_EXTLANG: include #lt_extlang_t object into the result.
+ * @LT_TAG_FILTER_SCRIPT: include #lt_script_t object into the result.
+ * @LT_TAG_FILTER_REGION: include #lt_region_t object into the result.
+ * @LT_TAG_FILTER_VARIANT: include #lt_variant_t object into the result.
+ * @LT_TAG_FILTER_EXTENSION: include #lt_extension_t object into the result.
+ * @LT_TAG_FILTER_PRIVATEUSE: include the privateuse object into the result.
+ * @LT_TAG_FILTER_GRANDFATHERED: include #lt_grandfathered_t object into the result.
+ * @LT_TAG_FILTER_ALL: no objects filtered.
  *
  * This is used as a binary count sequence with lt_tag_get_string_with_filter()
  * to allow only given tags to be the outcome.

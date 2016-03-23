@@ -341,10 +341,39 @@ typedef signed int		ssize_t;
 #  endif
 #endif
 
+/**
+ * lt_pointer_t:
+ *
+ * The type of object pointer.
+ */
 typedef void *		lt_pointer_t;
+/**
+ * lt_bool_t:
+ *
+ * The type of boolean value.
+ */
 typedef int		lt_bool_t;
+/**
+ * lt_copy_func_t:
+ * @data: the object to be copied.
+ *
+ * The type of callback function used for copying @data.
+ */
 typedef lt_pointer_t (* lt_copy_func_t)	(lt_pointer_t data);
+/**
+ * lt_destroy_func_t:
+ * @data: the object to be destroyed.
+ *
+ * The type of callback function used for destroying @data.
+ */
 typedef void (* lt_destroy_func_t)	(lt_pointer_t data);
+/**
+ * lt_compare_func_t:
+ * @v1: the object to compare with @v2.
+ * @v2: the object to compare with @v1.
+ *
+ * The type of callback function used for comparing objects.
+ */
 typedef int (* lt_compare_func_t)	(const lt_pointer_t v1,
 					 const lt_pointer_t v2);
 
