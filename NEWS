@@ -1,3 +1,27 @@
+0.5.8 -> 0.6.0
+=================
+Akira TAGOH (20):
+      Initialize databases just once.
+      Fix a build fail when --enable-debug
+      Support BCP47-like locale representation
+      Add deprecation macros
+      Use deprecation macros
+      Add a lookup table to catch up a script/language from language/script
+      Update to add more files into .gitignore
+      Fix the behavior on lt_tag_transform() according to tr#35
+      Fix a segfault if no territory or script is given to lt_tag_convert_from_locale_string()
+      Add missing header file
+      Add lt_db_set_val() to change the place of database
+      Fix memory leaks
+      missing gobject function for lt_relation_db thing
+      Support the language alias for the canonicalization
+      Fix lt_trie_keys() not working
+      Fix OOM handling
+      Improve the bootup time
+      Get rid of deprecated macro
+      Add docs
+      Update the library versioning
+
 0.5.7 -> 0.5.8
 =================
 Akira TAGOH (6):
