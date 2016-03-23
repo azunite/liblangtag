@@ -173,27 +173,27 @@ gir.deps: $(srcdir)/gendeps.sh Makefile
 
 -include gir.deps
 
-LangTag-0.5.gir: gir.deps liblangtag-gobject.la Makefile
-LangTag_0_5_gir_INCLUDES =		\
+LangTag-0.6.gir: gir.deps liblangtag-gobject.la Makefile
+LangTag_0_6_gir_INCLUDES =		\
 	GLib-2.0			\
 	GObject-2.0			\
 	$(NULL)
-LangTag_0_5_gir_SCANNERFLAGS =		\
+LangTag_0_6_gir_SCANNERFLAGS =		\
 	--symbol-prefix=lt		\
 	--identifier-prefix=Lt		\
 	-v				\
 	$(NULL)
-LangTag_0_5_gir_CFLAGS =		\
+LangTag_0_6_gir_CFLAGS =		\
 	$(AM_CPPFLAGS)			\
 	$(NULL)
-LangTag_0_5_gir_LIBS =			\
+LangTag_0_6_gir_LIBS =			\
 	liblangtag-gobject.la		\
 	$(NULL)
-LangTag_0_5_gir_FILES =			\
+LangTag_0_6_gir_FILES =			\
 	$(introspection_sources)	\
 	$(NULL)
 
-INTROSPECTION_GIRS += LangTag-0.5.gir
+INTROSPECTION_GIRS += LangTag-0.6.gir
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
